@@ -393,15 +393,18 @@ export default {
         let valid_filter_name = Object.values(this.filter_name);
         const result = data.filter(hotel => valid_filter_name.includes(hotel.hotel_name));
         this.data = result;
+        this.dataKey++;
         return result;
       } else {
         if (this.filter_star === "all") {
           const result = data;
           this.data = result;
+          this.dataKey++;
           return result;
         } else {
           const result = data.filter(hotel => hotel.hotel_star === parseInt(this.filter_star));
           this.data = result;
+          this.dataKey++;
           return result;
         }
       }
@@ -492,6 +495,8 @@ export default {
           if (this.filter_provider.parmis && provider.provider_name === "parmis") {
             providers.push({...provider});
           }
+
+          console.log(this.filter_provider)
         })
         //
         if (providers.length) {
@@ -500,6 +505,10 @@ export default {
         }
       }
       this.data = hotel_provider;
+      // console.log(hotel_item.providers)
+      console.log(this.data );
+      this.dataKey++;
+      
       return hotel_provider;
     },
 
@@ -579,8 +588,12 @@ export default {
         for (let pv in this.filter_provider) {
           this.filter_provider[pv] = true;
         }
+        
       }
+
+      console.log(this.filter_provider)
       this.filterProvider();
+      this.dataKey++;
     },
     getData(use_cache = true) {
       this.$store.state.disable_header_link = true;

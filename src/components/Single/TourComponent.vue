@@ -184,7 +184,7 @@ export default {
     // Set interval to check the size of analysis_data every 1000ms (1 second)
     this.checkDataSizeInterval = setInterval(() => {
       const currentSize = Object.keys(this.analysis_data).length;
-      console.log(this.analysis_data)
+      // console.log(this.analysis_data)
       // Check if the size has changed
       if (currentSize !== this.previousSize) {
         this.previousSize = currentSize;
@@ -216,7 +216,7 @@ export default {
       const keys = Object.keys(this.analysis_data);
       //  = keys;
 
-      console.log(this.analysis_data)
+      // console.log(this.analysis_data)
       for (let date of keys) {
         const persian_date = moment_jalali(date).format("jYYYY/jMM/jDD");
         this.options.xaxis.categories.push(persian_date);
