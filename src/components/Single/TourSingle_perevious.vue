@@ -3,7 +3,7 @@
     <print-component :data="data" v-if="show_print" :start_date="search_start" :end_date="search_end"></print-component>
     <div class="row align-items-end">
 
-      
+
 
 
       <!-- NEWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW -->
@@ -131,56 +131,8 @@
                   <option value="hour_a_d">پرواز برگشت - شب به صبح</option>
                 </select>
               </div>
-              
-                          <!-- --- PROVIDER --- -->
-            <div class="col-12 mt-3 d-flex align-items-center justify-content-between">
-              <div class="position-relative w-100 border rounded mt-4 p-2 bg-white">
-                <div class="cursor-pointer h-100 w-100" v-on:click="show_provider = !show_provider">
-                  <p class="m-0">تامین کنندگان</p>
-                </div>
-                <div class="provider-overlay" v-if="show_provider" v-on:click="show_provider = false"></div>
-                <div class="position-absolute w-100 p-3 provider-item bg-white rounded border" 
-                    v-if="show_provider" 
-                    style="max-height: 300px; overflow-y: auto;">
-                  <div class="d-flex justify-content-between align-items-center position-relative">
-                    <div>
-                      <input type="checkbox" id="filter_provider_all" class="form-check-input" :value="true"
-                            v-model="allProviderFilter" v-on:change="allProviderFilterMethod">
-                      <label for="filter_provider_all" class="form-check-label me-1">all</label>
-                    </div>
-                    <div class="m-0 d-flex justify-content-between align-items-center tooltip-custom-main">
-                      {{ allProviderLength }}
-                    </div>
-                  </div>
-                  <div class="d-flex justify-content-between align-items-center mt-3 position-relative"
-                      v-for="(provider, index) of providerLength" :key="index">
-                    <div>
-                      <input type="checkbox" :id="`filter_provider_${provider.name}`" class="form-check-input"
-                            :value="true" :data-value="filter_provider[provider.name]"
-                            v-model="filter_provider[provider.name]" v-on:change="sortedData">
-                      <label :for="`filter_provider_${provider.name}`" class="form-check-label me-1">
-                        <a :href="provider.url" target="_blank" class="m-0 link-dark">{{ provider.name }}</a>
-                      </label>
-                    </div>
-                    <div class="m-0 d-flex justify-content-between align-items-center tooltip-custom-main">
-                      <p>{{ provider.count }}</p>
-                      <svg v-if="provider.count === 0" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                          fill="currentColor"
-                          class="bi bi-exclamation-circle text-danger me-1" viewBox="0 0 16 16">
-                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                        <path
-                            d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/>
-                      </svg>
-                      <div v-if="provider.count === 0" class="position-absolute p-2 tooltip-custom">
-                        {{ provider.message }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
 
-              <!-- --- PROVIDER OLD---
+              <!-- --- PROVIDER --- -->
               <div class="col-12 mt-3 d-flex align-items-center justify-content-between">
                 <div class="position-relative w-100 border rounded mt-4 p-2 bg-white">
                   <div class="cursor-pointer h-100 w-100" v-on:click="show_provider = !show_provider">
@@ -201,7 +153,6 @@
                     <div class="d-flex justify-content-between align-items-center mt-3 position-relative"
                          v-for="(provider, index) of providerLength" :key="index">
                       <div>
-                        
                         <input type="checkbox" :id="`filter_provider_${provider.name}`" class="form-check-input"
                                :value="true" :data-value="filter_provider[provider.name]"
                                v-model="filter_provider[provider.name]" v-on:change="sortedData">
@@ -225,7 +176,7 @@
                     </div>
                   </div>
                 </div>
-              </div> -->
+              </div>
               <!-- --- ANALYSIS --- -->
               <div class="col-12 mt-3">
                 <div class="row">
@@ -357,48 +308,25 @@ export default {
       order_by: "price_a",
       show_provider: false,
       filter_provider: {
-        
-        Booking: true,
-        Dayan: true,
-        Jimbo:true,
-        Jimboo: true,
-        Snapp: true,
         alibaba: true,
-        alwin: true,
         booking: true,
-        darvishi: true,
-        dayan: true,
+        Jimboo:true,
+        alwin: true,
         deltaban: true,
+        sepid_parvaz: true,
+        dayan: true,
+        omid_oj: true,
+        parmis: true,
+        mehrab: true,
+        rahbal: true,
+        kimiya:true,
         eram2mhd:true,
-        hamood:true,
+        tak_setare: true,
         hrc: true,
-        kimiya: true,
-        mehrab:true,
-        moeindarbari:true,
-        omid_oj:true,
-        parmis:true,
-        rahbal:true,
+        hamood:true,
         safiran:true,
-        sepid_parvaz:true,
-        tak_setare:true
-
-        // alibaba: true,
-        // booking: true,
-        // Jimboo:true,
-        // alwin: true,
-        // deltaban: true,
-        // sepid_parvaz: true,
-        // Dayan: true,
-        // omid_oj: true,
-        // parmis: true,
-        // mehrab: true,
-        // rahbal: true,
-        // kimiya:true,
-        // eram2mhd:true,
-        // tak_setare: true,
-        // hrc: true,
-        // hamood:true,
-        // safiran:true
+        darvishi:true,
+        moeindarbari:true
       },
       provider_length: {},
       hotels_name: [],
@@ -461,31 +389,23 @@ export default {
       }
     },
     sortedData() {
-      console.log(this.fixed_data)
-      const data = this.filterProvider();
-      console.log(data)
-      console.log( this.fixed_data)  // all of data
-      // const data = this.getSortedData(this.filterProvider());
-      console.log('this.filter_name.length === '+this.filter_name.length)
+      const data = this.getSortedData(this.filterProvider());
       if (this.filter_name.length) {
         let valid_filter_name = Object.values(this.filter_name);
         const result = data.filter(hotel => valid_filter_name.includes(hotel.hotel_name));
         this.data = result;
         this.dataKey++;
-        console.log( this.data )
         return result;
       } else {
         if (this.filter_star === "all") {
           const result = data;
           this.data = result;
           this.dataKey++;
-          console.log( this.data )
           return result;
         } else {
           const result = data.filter(hotel => hotel.hotel_star === parseInt(this.filter_star));
           this.data = result;
           this.dataKey++;
-          console.log( this.data )
           return result;
         }
       }
@@ -493,66 +413,13 @@ export default {
     filterProvider() {
       let hotel_provider = [];
 
-      console.log(this.fixed_data);
-      console.log(this.filter_provider);
-      for (let hotel of this.fixed_data) {
-        let hotel_item = { ...hotel };
-        let providers = [];
-
-        hotel.providers.forEach(provider => {
-          let providerName = provider.provider_name;
-
-          if (
-            (this.filter_provider.alibaba && providerName === "alibaba") ||
-            (this.filter_provider.Snapp && providerName === "snapp") ||
-            (this.filter_provider.Booking && providerName === "booking") ||
-            (this.filter_provider.booking && providerName === "booking") ||
-            (this.filter_provider.Jimbo && providerName === "Jimboo") ||
-            (this.filter_provider.alwin && providerName === "alwin") ||
-            (this.filter_provider.deltaban && providerName === "deltaban") ||
-            (this.filter_provider.sepid_parvaz && providerName === "sepid_parvaz") ||
-            (this.filter_provider.dayan && providerName === "dayan") ||
-            (this.filter_provider.mehrab && providerName === "mehrab") ||
-            (this.filter_provider.kimiya && providerName === "kimiya") ||
-            (this.filter_provider.eram2mhd && providerName === "eram2mhd") ||
-            (this.filter_provider.safiran && providerName === "safiran") ||
-            (this.filter_provider.hamood && providerName === "hamood") ||
-            (this.filter_provider.rahbal && providerName === "rahbal") ||
-            (this.filter_provider.tak_setare && providerName === "tak_setare") ||
-            (this.filter_provider.hrc && providerName === "hrc") ||
-            (this.filter_provider.omid_oj && providerName === "omid_oj") ||
-            (this.filter_provider.parmis && providerName === "parmis") ||
-            (this.filter_provider.darvishi && providerName === "darvishi") ||
-            (this.filter_provider.moeindarbari && providerName === "moeindarbari") 
-
-          ) {
-            providers.push({ ...provider });
-          }
-        });
-
-        if (providers.length) {
-          hotel_item.providers = providers;
-          hotel_provider.push(hotel_item);
-        }
-      }
-
-      console.log(hotel_provider);
-      this.dataKey++;
-      this.data = hotel_provider;
-      return hotel_provider;
-    },
-
-    filterProvider_old() {
-      let hotel_provider = [];
-
       console.log( this.fixed_data);
 
-      console.log(this.fixed_data[0].providers[0].provider_name)
+
       for (let hotel of this.fixed_data) {
         let hotel_item = {...hotel};
         let providers = [];
         hotel_item.providers.forEach(provider => {
-         
           if (this.filter_provider.alibaba && provider.provider_name === "alibaba") {
             providers.push({...provider});
           }
@@ -599,6 +466,14 @@ export default {
             providers.push({...provider});
           }
 
+          if (this.filter_provider.darvishi && provider.provider_name === "darvishi") {
+            providers.push({...provider});
+          }
+
+          if (this.filter_provider.moeindarbari && provider.provider_name === "moeindarbari") {
+            providers.push({...provider});
+          }
+
           //---------
 
 
@@ -622,10 +497,7 @@ export default {
             providers.push({...provider});
           }
 
-          console.log(provider)
-          providers.push({...provider})
-          console.log(providers)
-
+          console.log(this.filter_provider)
         })
         //
         if (providers.length) {
@@ -633,42 +505,82 @@ export default {
           hotel_provider.push(hotel_item);
         }
       }
-      console.log(hotel_provider);
-      this.dataKey++;
       this.data = hotel_provider;
+      // console.log(hotel_item.providers)
+      console.log(this.data );
+      this.dataKey++;
+      
       return hotel_provider;
     },
-    getAnalysisData(use_cache) {
-      this.loading_analysis = true;
+
+
+  async getAnalysisData(use_cache) {
+    this.loading_analysis = true;
+    this.analysis_data = []; // Initialize the data array
+
+    const startDate = new Date(this.body.start_date); // Parse the initial start date
+  const api_body_template = {
+    source: this.body.source,
+    target: this.body.target,
+    night_count: this.body.night_count,
+    adults: this.body.adults,
+    range_number: 7,
+    use_cache,
+  };
+  this.range_number=7;
+  try {
+    for (let i = 0; i < 1; i+=this.range_number) {
+      // Calculate the current start_date for this iteration
+      const currentDate = new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000) // Increment by 1 day
+        .toISOString()
+        .split("T")[0];
+
+      // Create the API body for this specific date
       const api_body = {
-        source:this.body.source,
-        target: this.body.target,
-        start_date: this.body.start_date,
-        night_count: this.body.night_count,
-        range_number: 7,
-        adults: this.body.adults,
-        use_cache
+        ...api_body_template,
+        start_date: currentDate // Use the calculated date
+        
       };
-      this.$http.post('get-analysis/', api_body).then((res) => {
-        console.log(res);
-        this.analysis_data = res.data.data.data;
-        this.loading_analysis = false;
-        this.$store.state.disable_header_link = false
-      }).catch((e) => {
-        if (e.response.status === 401) {
-          return router.push('/login');
+
+      // Perform the POST request
+      const res = await this.$http.post("get-analysis/", api_body);
+      
+      
+      // Append the results to this.analysis_data
+      const fetchedData = (res.data && res.data.data && res.data.data.data) || {};
+      Object.entries(fetchedData).forEach(([key, value]) => {
+        if (!this.analysis_data[key]) {
+          // If the key doesn't exist, add it
+          this.analysis_data[key] = value;
+        } else {
+          // If the key exists, concatenate the arrays
+          this.analysis_data[key] = [...this.analysis_data[key], ...value];
         }
-        toast.error("مشکلی پیش آمده است٬ لطفا دوباره امتحان کنید", {
-          autoClose: 6000,
-          position: "bottom-left",
-          rtl: false,
-          closeOnClick: true
-        });
-      })
-    },
+      });
+
+
+      console.log(`Fetched data for ${currentDate}:`,this.analysis_data);
+
+      this.loading_analysis = false;
+      this.dataKey++;
+    }
+  } catch (e) {
+    if (e.response && e.response.status === 401) {
+      return router.push("/login");
+    }
+
+    toast.error("مشکلی پیش آمده است٬ لطفا دوباره امتحان کنید", {
+      autoClose: 6000,
+      position: "bottom-left",
+      rtl: false,
+      closeOnClick: true,
+    });
+  } finally {
+    this.loading_analysis = false;
+    this.$store.state.disable_header_link = false;
+  }
+},
     allProviderFilterMethod() {
-      // console.log(this.filter_name)
-      console.log(this.filter_provider)
       if (this.allProviderFilter) {
         for (let pv in this.filter_provider) {
           this.filter_provider[pv] = false;
@@ -677,8 +589,13 @@ export default {
         for (let pv in this.filter_provider) {
           this.filter_provider[pv] = true;
         }
+        
       }
+
+      
       this.filterProvider();
+      this.dataKey++;
+      console.log(this.filter_provider)
     },
     getData(use_cache = true) {
       this.$store.state.disable_header_link = true;
@@ -700,7 +617,6 @@ export default {
           this.data = req.data.data;
           this.provider_length = req.data.providers;
           this.fixed_data = this.data;
-          console.log(this.filter_provider)
           this.show_result = true;
           this.hotels_name = this.data.sort((a, b) => a.hotel_star - b.hotel_star).map(hotel => hotel.hotel_name);
           this.sortedData();
