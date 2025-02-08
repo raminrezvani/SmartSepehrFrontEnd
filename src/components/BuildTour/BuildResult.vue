@@ -5,6 +5,20 @@
       <div class="col-12 col-md-3">
         <div class="sticky-top">
           <div class="row align-items-center bg-white py-3 rounded">
+
+
+            <!-- --- تحلیل هتل --- -->
+            <div class="col-12">
+              <label for="analysis_star" class="text-muted mb-1">تحلیل هتل ها</label>
+              <v-select multiple :options="['1', '2','3','4','5']" v-model="filter.hotelstarAnalysis"></v-select>
+            <!-- دکمه استخراج تحلیل -->
+              <button class="btn btn-success mt-2" @click="extractAnalysis">
+                استخراج تحلیل
+              </button>
+
+            </div>
+
+
             <!-- --- NAME --- -->
             <div class="col-12">
               <label for="filter_name" class="text-muted mb-1">هتل</label>
@@ -63,8 +77,8 @@
         <main>
           <build-component v-for="(tour, index) in hotels" :key="index" :index="index" :hotel="tour"
                            :adults="adults" :target="target" :source="source"
-                           :analysis_data="analysis_data"
-                           :analysis_loading="analysis_loading"
+                           :analysis_data="analysis_data_here"
+                           :analysis_loading="analysis_loading_here"
                            :go_flight="go_flight[go_flight_index]"
                            :go_flight_provider="go_flight_provider_index"
                            :return_flight="return_flight[return_flight_index]"
@@ -340,10 +354,25 @@ export default {
     adults: Number,
     target: String,
     source: String,
+    body:Object,
    
   },
   data() {
     return {
+      datakey:0,
+      body_new: {
+        "start_date": "",
+        "end_date": "",
+        "night_count": 0,
+        "hotel_star": 5,
+        "source": this.source,
+        "target": this.target,
+        "adults": this.adults,
+        "use_cache":true,
+        "hotelstarAnalysis":[]
+      },
+      analysis_loading_here:false,
+      analysis_data_here:[],
       go_flight_index: 0,
       go_flight_provider_index: 0,
       show_more_go_flight_index: -1,
@@ -387,7 +416,8 @@ export default {
       },
       // ----------
       filter: {
-        hotel: []
+        hotel: [],
+        selected_star_analysis:[]
       }
     }
   },
@@ -408,6 +438,72 @@ export default {
 
 
   methods: {
+
+    extractAnalysis() {
+
+      console.log(this.filter.selected_star_analysis);
+      // analysis_data: Object,
+      // analysis_loading: Boolean,
+
+      this.analysis_loading_here=true;
+    
+    
+      // this.$store.state.disable_header_link = true;
+    
+    
+      // this.body ????????
+      // body: {
+      //   "start_date": "",
+      //   "end_date": "",
+      //   "night_count": 0,
+      //   "hotel_star": 5,
+      //   "source": "MHD",
+      //   "target": "KIH",
+      //   "adults": 2,
+      //   "use_cache":true
+      // },
+      // this.body.start_date='';
+      
+      // this.body.hotelStar_Search=this.filter.selected_star_analysis;
+      this.body_new.adults=this.body;
+      
+      this.body_new.start_date=this.body.start_date;
+      this.body_new.end_date=this.body.end_date;
+      this.body_new.night_count=this.body.night_count;
+      this.body_new.hotel_star=this.body.hotel_star;
+      this.body_new.source=this.body.source;
+      this.body_new.target=this.body.target;
+      this.body_new.adults=this.body.adults;
+      this.body_new.use_cache=this.body.use_cache;
+      this.body_new.hotel_star=this.body.hotel_star;
+      this.body_new.hotelstarAnalysis=this.filter.hotelstarAnalysis;
+
+
+
+
+    this.$http.post('/build-tour-analyse/', this.body_new, { timeout: 600000000 })
+      .then(res => {
+        // bayad ADD to this.analysis.data
+        this.analysis_data_here = res.data;
+        console.log('New Build_analysis')
+        this.analysis_loading_here = false;
+        this.datakey++;
+      })
+      .catch((e) => {
+        if (e.response && e.response.status === 401) {
+          return this.$router.push('/login');
+        } else if (e.response && e.response.status === 504) {
+          // مدیریت خطای Gateway Timeout
+          this.analysis_data_here = { message: "The server took too long to respond. Please try again later." };
+        }
+      })
+      .finally(() => {
+        // this.$store.state.disable_header_link = false;
+        this.analysis_loading_here = false;
+      });
+  },
+
+  
     getGoFlights() {
       // let result = [];
       // for (let flight of this.data.flight.go_flight) {

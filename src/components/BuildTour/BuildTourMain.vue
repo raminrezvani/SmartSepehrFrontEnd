@@ -283,7 +283,7 @@
     <section>
       <build-loading v-if="loading"></build-loading>
       <build-result v-if="show_result"    :key="dataKey"       :data="data" :adults="parseInt(this.body.adults)"
-                    :target="body.target"  :source="body.source" :analysis_data="analyse_data" :analysis_loading="show_analyse_loading"></build-result>
+                    :target="body.target"  :body="this.body" :source="body.source" :analysis_data="analyse_data" :analysis_loading="show_analyse_loading"></build-result>
     </section>
   </main>
 </template>
@@ -352,6 +352,7 @@ export default {
         "target": "KIH",
         "adults": 2,
         "use_cache":true
+       
       },
       calendar_data: {
         go: [],
@@ -715,6 +716,7 @@ export default {
       this.loading = true;
       this.show_result = false;
       console.log("this.body == "+this.body);
+
       this.$http.post('/build-tour/', this.body).then(res => {
         console.log(res);
 
@@ -732,6 +734,7 @@ export default {
 
 
         this.getAnalyseData(use_cache);
+        this.datakey++;
       }).catch((e) => {
         if (e.response.status === 401) {
           return router.push('/login');
@@ -749,25 +752,26 @@ export default {
     },
     getAnalyseData(use_cache) {
       this.body.night_count = parseInt(this.body.night_count);
-      this.show_analyse_loading = true;
+      this.show_analyse_loading = false;
       this.$store.state.disable_header_link = true;
       this.body.range = 7;
       this.body.use_cache = use_cache;
       console.log("this.body == "+this.body);
-      this.$http.post('/build-tour-analyse/', this.body, { timeout: 600000000 }).then(res => {
-        this.analyse_data = res.data;
-      }).catch((e) => {
-        if (e.response.status === 401) {
-          return router.push('/login');
-        }
-        else if (e.response.status === 504) {
-          // Handle Gateway Timeout error
-          this.analyse_data = { message: "The server took too long to respond. Please try again later." };
-        }
-      }).finally(() => {
-      this.$store.state.disable_header_link = false;
-        this.show_analyse_loading = false;
-      })
+      this.dataKey++;
+      // this.$http.post('/build-tour-analyse/', this.body, { timeout: 600000000 }).then(res => {
+      //   this.analyse_data = res.data;
+      // }).catch((e) => {
+      //   if (e.response.status === 401) {
+      //     return router.push('/login');
+      //   }
+      //   else if (e.response.status === 504) {
+      //     // Handle Gateway Timeout error
+      //     this.analyse_data = { message: "The server took too long to respond. Please try again later." };
+      //   }
+      // }).finally(() => {
+      // this.$store.state.disable_header_link = false;
+      //   this.show_analyse_loading = false;
+      // })
     },
     calcNighCount() {
       if (!this.body.start_date || !this.body.end_date) {

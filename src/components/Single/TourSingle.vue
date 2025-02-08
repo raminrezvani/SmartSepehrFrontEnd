@@ -132,7 +132,7 @@
                 </select>
               </div>
               
-                          <!-- --- PROVIDER --- -->
+            <!-- --- PROVIDER --- -->
             <div class="col-12 mt-3 d-flex align-items-center justify-content-between">
               <div class="position-relative w-100 border rounded mt-4 p-2 bg-white">
                 <div class="cursor-pointer h-100 w-100" v-on:click="show_provider = !show_provider">

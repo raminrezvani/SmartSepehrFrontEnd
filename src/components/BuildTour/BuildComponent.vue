@@ -87,11 +87,7 @@
             <span v-else>نمایش آنالیز</span>
           </button>
 
-          <button class="btn btn-primary" :disabled="analysis_loading" v-on:click="showAnalysis">
-            <i class="fa fa-spinner fa-spin ms-1" v-if="analysis_loading"></i>
-            <span v-if="show_analysis">بستن آنالیز</span>
-            <span v-else>استخراج داده ها</span>
-          </button>
+
 
           
           <!--          <p class="m-0">خدمات :</p>-->
