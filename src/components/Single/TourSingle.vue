@@ -358,30 +358,47 @@ export default {
       show_provider: false,
       filter_provider: {
         
-        Booking: true,
-        Dayan: true,
+        "Mehrab Seir":true,
+        Eram2MHD:true,
+        eram2mhd:true,
+        
+        mehrab:true,
+        HRC:true,
+        hrc: true,
+        Kimiya:true,
+        kimiya: true,
+        "Tak Setare":true,
+        tak_setare:true,
+        Parmis:true,
+        parmis:true,
+        Rahbal:true,
+        rahbal:true,
+        Safiran:true,
+        safiran:true,
+        "Omid Oj":true,
+        omid_oj:true,
+        "Sepid Parvaz":true,
+        sepid_parvaz:true,
+        Hamood:true,
+        hamood:true,
+        Dayan:true,
+        dayan: true,
+        Darvishi:true,
+        darvishi: true,
+        Moeindarbari:true,
+        moeindarbari:true,
+        Deltaban:true,
+        deltaban: true,
         Jimbo:true,
         Jimboo: true,
+        Booking:true,
+        booking: true,
+        snapp:true,
         Snapp: true,
         alibaba: true,
+        Alibaba:true,
         alwin: true,
-        booking: true,
-        darvishi: true,
-        dayan: true,
-        deltaban: true,
-        eram2mhd:true,
-        hamood:true,
-        hrc: true,
-        kimiya: true,
-        mehrab:true,
-        moeindarbari:true,
-        omid_oj:true,
-        parmis:true,
-        rahbal:true,
-        safiran:true,
-        sepid_parvaz:true,
-        tak_setare:true
-
+        Alwin:true,
         // alibaba: true,
         // booking: true,
         // Jimboo:true,
@@ -504,26 +521,74 @@ export default {
 
           if (
             (this.filter_provider.alibaba && providerName === "alibaba") ||
+            (this.filter_provider.Alibaba && providerName === "alibaba") ||
+
             (this.filter_provider.Snapp && providerName === "snapp") ||
+            (this.filter_provider.snapp && providerName === "snapp") ||
+
             (this.filter_provider.Booking && providerName === "booking") ||
             (this.filter_provider.booking && providerName === "booking") ||
+
+
             (this.filter_provider.Jimbo && providerName === "Jimboo") ||
+            (this.filter_provider.Jimboo && providerName === "Jimboo") ||
+
+
             (this.filter_provider.alwin && providerName === "alwin") ||
+            (this.filter_provider.Alwin && providerName === "alwin") ||
+
+            //???????????????????????????????????????????????????????????
+
             (this.filter_provider.deltaban && providerName === "deltaban") ||
+            (this.filter_provider.deltaban && providerName === "Deltaban") ||
+
             (this.filter_provider.sepid_parvaz && providerName === "sepid_parvaz") ||
+            (this.filter_provider["Sepid Parvaz"] && providerName === "sepid_parvaz") ||
+
             (this.filter_provider.dayan && providerName === "dayan") ||
+            (this.filter_provider.Dayan && providerName === "dayan") ||
+
             (this.filter_provider.mehrab && providerName === "mehrab") ||
+            (this.filter_provider["Mehrab Seir"] && providerName === "mehrab") ||
+
             (this.filter_provider.kimiya && providerName === "kimiya") ||
+            (this.filter_provider.Kimiya && providerName === "kimiya") ||
+
+
             (this.filter_provider.eram2mhd && providerName === "eram2mhd") ||
+            (this.filter_provider.Eram2MHD && providerName === "eram2mhd") ||
+
+
             (this.filter_provider.safiran && providerName === "safiran") ||
+            (this.filter_provider.Safiran && providerName === "safiran") ||
+
+
             (this.filter_provider.hamood && providerName === "hamood") ||
+            (this.filter_provider.Hamood && providerName === "hamood") ||
+
+
             (this.filter_provider.rahbal && providerName === "rahbal") ||
+            (this.filter_provider.Rahbal && providerName === "rahbal") ||
+
             (this.filter_provider.tak_setare && providerName === "tak_setare") ||
+            (this.filter_provider["Tak Setare"] && providerName === "tak_setare") ||
+
             (this.filter_provider.hrc && providerName === "hrc") ||
+            (this.filter_provider.HRC && providerName === "hrc") ||
+
             (this.filter_provider.omid_oj && providerName === "omid_oj") ||
+            (this.filter_provider["Omid Oj"] && providerName === "omid_oj") ||
+
             (this.filter_provider.parmis && providerName === "parmis") ||
+            (this.filter_provider.Parmis && providerName === "parmis") ||
+
             (this.filter_provider.darvishi && providerName === "darvishi") ||
-            (this.filter_provider.moeindarbari && providerName === "moeindarbari") 
+            (this.filter_provider.Darvishi && providerName === "darvishi") ||
+
+            (this.filter_provider.moeindarbari && providerName === "moeindarbari") ||
+            (this.filter_provider.Moeindarbari && providerName === "moeindarbari") 
+
+
 
           ) {
             providers.push({ ...provider });
