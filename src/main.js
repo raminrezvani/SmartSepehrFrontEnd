@@ -12,9 +12,9 @@ const app = Vue.createApp(App);
 
 const access_token = localStorage.getItem("access_token");
 axios.defaults.timeout = 1000 * 60 * 3;   // 2 minutes
-// axios.defaults.baseURL = "https://tour-collector-api.sepehrsmart.ir/";
+axios.defaults.baseURL = "https://tour-collector-api.sepehrsmart.ir/";
 // axios.defaults.baseURL = "https://smarttravelback.iotstream.ir/";
-axios.defaults.baseURL = "http://127.0.0.1:8765/";
+// axios.defaults.baseURL = "http://127.0.0.1:8765/";
 // 
 // axios.defaults.baseURL = "http://94.74.182.183:8585/";
 
