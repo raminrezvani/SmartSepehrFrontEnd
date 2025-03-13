@@ -219,6 +219,7 @@ export default {
       // console.log(this.analysis_data)
       for (let date of keys) {
         const persian_date = moment_jalali(date).format("jYYYY/jMM/jDD");
+        console.log(date +' -----> '+ persian_date)
         this.options.xaxis.categories.push(persian_date);
         let price = 0;
         let provider_name = "";
