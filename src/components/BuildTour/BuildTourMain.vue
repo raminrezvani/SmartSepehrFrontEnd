@@ -215,8 +215,8 @@
 
       
       <!-- --- PROVIDER --- -->
-      <div class="col-12 mt-3 d-flex align-items-center justify-content-between">
-        <div class="position-relative w-100 border rounded mt-4 p-2 bg-white">
+      <div class="col-12 col-md-6 mt-3">
+        <div class="position-relative border rounded p-2 bg-white">
           <div class="cursor-pointer h-100 w-100" v-on:click="show_provider = !show_provider">
             <p class="m-0">تامین کنندگان</p>
           </div>
@@ -226,33 +226,35 @@
               <div>
                 <input type="checkbox" id="filter_provider_all" class="form-check-input" :value="true"
                         v-model="allProviderFilter" v-on:change="allProviderFilterMethod">
-                <label for="filter_provider_all" class="form-check-label me-1">all</label>
+                <label for="filter_provider_all" class="form-check-label me-1">همه</label>
               </div>
               <div class="m-0 d-flex justify-content-between align-items-center tooltip-custom-main">
                 {{ allProviderLength }}
               </div>
             </div>
-            <div class="d-flex justify-content-between align-items-center mt-3 position-relative"
-                  v-for="(provider, index) of providerLength" :key="index">
-              <div>
-                <input type="checkbox" :id="`filter_provider_${provider.name}`" class="form-check-input"
-                        :value="true" :data-value="filter_provider[provider.name]"
-                        v-model="filter_provider[provider.name]" v-on:change="sortedData">
-                <label :for="`filter_provider_${provider.name}`" class="form-check-label me-1">
-                  <a :href="provider.url" target="_blank" class="m-0 link-dark">{{ provider.name }}</a>
-                </label>
-              </div>
-              <div class="m-0 d-flex justify-content-between align-items-center tooltip-custom-main">
-                <p>{{ provider.count }}</p>
-                <svg v-if="provider.count === 0" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                      fill="currentColor"
-                      class="bi bi-exclamation-circle text-danger me-1" viewBox="0 0 16 16">
-                  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                  <path
-                      d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/>
-                </svg>
-                <div v-if="provider.count === 0" class="position-absolute p-2 tooltip-custom">
-                  {{ provider.message }}
+            <div class="providers-list" style="max-height: 300px; overflow-y: auto;">
+              <div class="d-flex justify-content-between align-items-center mt-3 position-relative"
+                    v-for="(provider, index) of providerLength" :key="index">
+                <div>
+                  <input type="checkbox" :id="`filter_provider_${provider.name}`" class="form-check-input"
+                          :value="true" :data-value="filter_provider[provider.name]"
+                          v-model="filter_provider[provider.name]" v-on:change="sortedData">
+                  <label :for="`filter_provider_${provider.name}`" class="form-check-label me-1">
+                    <a :href="provider.url" target="_blank" class="m-0 link-dark">{{ provider.name }}</a>
+                  </label>
+                </div>
+                <div class="m-0 d-flex justify-content-between align-items-center tooltip-custom-main">
+                  <p>{{ provider.count }}</p>
+                  <svg v-if="provider.count === 0" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                        fill="currentColor"
+                        class="bi bi-exclamation-circle text-danger me-1" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                    <path
+                        d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/>
+                  </svg>
+                  <div v-if="provider.count === 0" class="position-absolute p-2 tooltip-custom">
+                    {{ provider.message }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -973,5 +975,42 @@ export default {
 </script>
 
 <style scoped>
+.providers-list {
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
+  margin-top: 10px;
+}
 
+.providers-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.providers-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.providers-list::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.providers-list::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.provider-item {
+  max-height: 400px;
+  z-index: 1000;
+}
+
+.provider-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
 </style>

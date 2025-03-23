@@ -66,7 +66,12 @@
           <!-- --- DATEPICKER DAYS --- -->
           <div v-for="day in [...Array(month_days_count).keys()]" :key="day">
             <div
-                :class="{'c-button': true, 'active': isActiveDay(day + 1), 'disable': isDisableDay(day + 1)}"
+                :class="{
+                  'c-button': true, 
+                  'active': isActiveDay(day + 1), 
+                  'disable': isDisableDay(day + 1),
+                  'lowest-price': isLowestPrice(day + 1)
+                }"
                 v-on:click="setDate(day + 1)">
               <div>
                 <p class="m-0 c-day">{{ day + 1 }}</p>
@@ -332,6 +337,23 @@ export default {
       } catch (e) {
         return ''
       }
+    },
+    isLowestPrice(day) {
+      if (this.isDisableDay(day)) return false;
+      const day_key = `${this.current_search.year}/${this.current_search.month + 1 < 10 ? '0' : ''}${this.current_search.month + 1}/${day < 10 ? '0' : ''}${day}`;
+      const day_filter = this.days_data.filter(a => a.date === day_key);
+      if (!day_filter.length) return false;
+      
+      const currentPrice = Number(day_filter[0].price);
+      const monthKey = `${this.current_search.year}/${this.current_search.month + 1 < 10 ? '0' : ''}${this.current_search.month + 1}`;
+      const monthDays = this.days_data.filter(a => a.date.startsWith(monthKey));
+      
+      if (monthDays.length === 0) return false;
+      
+      const prices = monthDays.map(d => Number(d.price));
+      const minPrice = Math.min(...prices);
+      
+      return currentPrice === minPrice;
     }
   },
 // -----
@@ -364,4 +386,32 @@ export default {
 
 <style scoped>
 @import "../../assets/datepicker/main.css";
+
+.lowest-price {
+  background-color: #e8f5e9 !important;
+  border: 2px solid #198754 !important;
+  box-shadow: 0 0 5px rgba(25, 135, 84, 0.2) !important;
+}
+
+.lowest-price .c-day,
+.lowest-price .c-price {
+  color: #198754 !important;
+  font-weight: 600 !important;
+}
+
+.lowest-price:hover {
+  background-color: #d4edda !important;
+  transform: scale(1.05);
+  transition: all 0.2s ease;
+}
+
+.lowest-price.active {
+  background-color: #198754 !important;
+  color: white !important;
+}
+
+.lowest-price.active .c-day,
+.lowest-price.active .c-price {
+  color: white !important;
+}
 </style>
