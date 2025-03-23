@@ -336,7 +336,18 @@ export default {
         safiran:true,
         FlyToday:true,
         darvishi:true,
-        moeindarbari:true
+        moeindarbari:true,
+
+        hamsafar:true,
+        iman:true,
+        dolfin:true,
+        flamingo:true,
+        shayan_gasht:true,
+        yegane_fard:true,
+        alaedin:true,
+
+
+
 
 
       },
@@ -594,6 +605,19 @@ export default {
               (this.filter_provider.omid_oj && room.provider === "omid_oj") ||
               (this.filter_provider.darvishi && room.provider === "darvishi") ||
               (this.filter_provider.moeindarbari && room.provider === "moeindarbari") ||
+
+
+
+              (this.filter_provider.hamsafar && room.provider === "hamsafar") ||
+              (this.filter_provider.iman && room.provider === "iman") ||
+              (this.filter_provider.flamingo && room.provider === "flamingo") ||
+              (this.filter_provider.shayan_gasht && room.provider === "shayan_gasht") ||
+              (this.filter_provider.yegane_fard && room.provider === "yegane_fard") ||
+              (this.filter_provider.dolfin && room.provider === "dolfin") ||
+              (this.filter_provider.Alaedin && room.provider === "alaedin") ||
+
+
+
 
               (this.filter_provider.parmis && room.provider === "parmis")
             ) {
