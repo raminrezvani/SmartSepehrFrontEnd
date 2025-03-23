@@ -907,6 +907,14 @@ export default {
   border-radius: 4px;
   border: 1px solid #ced4da;
   background-color: #fff;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: none !important;
+}
+
+.form-select::-ms-expand {
+  display: none;
 }
 
 .date-picker {
