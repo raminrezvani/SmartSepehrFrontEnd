@@ -40,7 +40,7 @@
             <!-- --- SORT --- -->
             <div class="col-12 mt-3">
               <label for="order_by_filter" class="text-muted mb-2">مرتب سازی</label>
-              <select class="form-select" id="order_by_filter">
+              <select class="form-select" id="order_by_filter" v-model="filter.orderBy" @change="sortHotels">
                 <option value="price_a">قیمت - کم به زیاد</option>
                 <option value="price_d">قیمت - زیاد به کم</option>
                 <option value="hour_d_a">ساعت پرواز - صبح به شب</option>
@@ -361,18 +361,41 @@ export default {
   name: "BuildResult",
   components: {BuildTourAnalyse, BuildComponent},
   props: {
-    data: Object,
-    analysis_data: Object,
-    analysis_loading: Boolean,
-    adults: Number,
-    target: String,
-    source: String,
-    body:Object,
-   
+    data: {
+      type: Object,
+      required: true,
+      validator(value) {
+        return value && (value.hotel || value.flight);
+      }
+    },
+    analysis_data: {
+      type: Object,
+      default: () => ({})
+    },
+    analysis_loading: {
+      type: Boolean,
+      default: false
+    },
+    adults: {
+      type: Number,
+      required: true
+    },
+    target: {
+      type: String,
+      required: true
+    },
+    source: {
+      type: String,
+      required: true
+    },
+    body: {
+      type: Object,
+      required: true
+    }
   },
   data() {
     return {
-      datakey:0,
+      datakey: 0,
       body_new: {
         "start_date": "",
         "end_date": "",
@@ -381,45 +404,22 @@ export default {
         "source": this.source,
         "target": this.target,
         "adults": this.adults,
-        "use_cache":true,
-        "hotelstarAnalysis":[]
+        "use_cache": true,
+        "hotelstarAnalysis": []
       },
-      analysis_loading_here:false,
-      analysis_data_here:[],
+      analysis_loading_here: false,
+      analysis_data_here: [],
       go_flight_index: 0,
       go_flight_provider_index: 0,
       show_more_go_flight_index: -1,
       return_flight_index: 0,
       return_flight_provider_index: 0,
       show_more_return_flight_index: -1,
-
-      //============ New code =====
-      // مقادیر اولیه
-      // static_hotels: [],
-      // hotels: [],
-      // go_flight: [],
-      // return_flight: [],
-      //================
-      // ----------
-      static_hotels: this.data.hotel,
-      hotels: this.data.hotel,
-      go_flight: this.getGoFlights(),
-      return_flight: this.getReturnFlights(),
-      
-    
-      
-
-      // hotel_names: this.data.hotel.map(hotel => hotel.hotel_name),
-      // Example hotels array
-      hotel_names:
-                [
-                { name: 'Hotel A', min_price: 100 },
-                { name: 'Hotel B', min_price: 50 },
-                { name: 'Hotel C', min_price: undefined }, // Example of missing min_price
-                ],
-      // ----------
+      static_hotels: [],
+      hotels: [],
+      go_flight: [],
+      return_flight: [],
       show_analysis: false,
-      // ----------
       last_search: {
         date: new Date(),
         minute: 0,
@@ -427,57 +427,48 @@ export default {
         interval: null,
         warning: false
       },
-      // ----------
       filter: {
         hotel: [],
-        selected_star_analysis:[]
+        selected_star_analysis: [],
+        orderBy: "price_a"
       }
     }
   },
-
-
-  // //============== new Code ===========
-  // mounted() {
-  //   // بعد از رندر شدن کامپوننت و وقتی داده‌ها آماده شد، این متدها فراخوانی می‌شوند
-  //   this.static_hotels = this.data.hotel;
-  //   this.hotels = this.data.hotel;
-  //   this.go_flight = this.getGoFlights();
-  //   this.return_flight = this.getReturnFlights();
-    
-
-  // },
-  //=====================
-
-
-
   methods: {
-
+    initializeData() {
+      try {
+        // Initialize hotels data
+        if (this.data?.hotel?.length) {
+          this.static_hotels = [...this.data.hotel];
+          this.hotels = [...this.data.hotel];
+        } else {
+          console.warn('No hotel data available');
+          this.static_hotels = [];
+          this.hotels = [];
+        }
+        
+        // Initialize flights
+        this.go_flight = this.getGoFlights();
+        this.return_flight = this.getReturnFlights();
+        
+        // Initialize other data
+        this.calc_last_search();
+        
+        // Apply initial sorting if we have hotels
+        if (this.hotels.length) {
+          this.sortHotels();
+        }
+        
+        // Force component update
+        this.datakey++;
+      } catch (error) {
+        console.error("Error initializing data:", error);
+      }
+    },
     extractAnalysis() {
-
       console.log(this.filter.selected_star_analysis);
-      // analysis_data: Object,
-      // analysis_loading: Boolean,
-
       this.analysis_loading_here=true;
     
-    
-      // this.$store.state.disable_header_link = true;
-    
-    
-      // this.body ????????
-      // body: {
-      //   "start_date": "",
-      //   "end_date": "",
-      //   "night_count": 0,
-      //   "hotel_star": 5,
-      //   "source": "MHD",
-      //   "target": "KIH",
-      //   "adults": 2,
-      //   "use_cache":true
-      // },
-      // this.body.start_date='';
-      
-      // this.body.hotelStar_Search=this.filter.selected_star_analysis;
       this.body_new.adults=this.body;
       
       this.body_new.start_date=this.body.start_date;
@@ -491,12 +482,8 @@ export default {
       this.body_new.hotel_star=this.body.hotel_star;
       this.body_new.hotelstarAnalysis=this.filter.hotelstarAnalysis;
 
-
-
-
     this.$http.post('/build-tour-analyse/', this.body_new, { timeout: 600000000 })
       .then(res => {
-        // bayad ADD to this.analysis.data
         this.analysis_data_here = res.data;
         console.log('New Build_analysis')
         this.analysis_loading_here = false;
@@ -506,88 +493,58 @@ export default {
         if (e.response && e.response.status === 401) {
           return this.$router.push('/login');
         } else if (e.response && e.response.status === 504) {
-          // مدیریت خطای Gateway Timeout
           this.analysis_data_here = { message: "The server took too long to respond. Please try again later." };
         }
       })
       .finally(() => {
-        // this.$store.state.disable_header_link = false;
         this.analysis_loading_here = false;
       });
   },
-
-  
     getGoFlights() {
-      // let result = [];
-      // for (let flight of this.data.flight.go_flight) {
-      //   const providers = flight.providers.filter(flg => flg.seat >= this.adults);
-      //  if (providers.length) {
-      //    flight.providers = providers;
-      //   result.push(flight);
-      //  }
-      // }
       try {
-      let result = [];
-      console.log("===============================================")
-      console.log(this.data.flight)
-      console.log("===============================================")
-      for (let flight of this.data.flight.go_flight) {
-        const providers = flight.providers.filter(flg => flg.seat >= this.adults);
-        if (providers.length) {
-          flight.providers = providers;
-          result.push(flight);
+        if (!this.data?.flight?.go_flight) {
+          console.warn("No go flight data available");
+          return [];
         }
+
+        return this.data.flight.go_flight.reduce((result, flight) => {
+          const providers = flight.providers.filter(flg => flg.seat >= this.adults);
+          if (providers.length) {
+            result.push({
+              ...flight,
+              providers
+            });
+          }
+          return result;
+        }, []);
+
+      } catch (error) {
+        console.error("Error in getGoFlights:", error);
+        return [];
       }
-      
-      return result; // Return the filtered flights
-
-    } catch (error) {
-      console.error("An error occurred while getting go flights:", error);
-      //this.showError("خطایی در دریافت اطلاعات پروازها رخ داده است. لطفا مجددا تلاش کنید.");
-      return []; // Return an empty array or handle the error appropriately
-    }
-
-
-  
-      // return this.data.flight.go_flight;
-      
-
-
-
-
     },
     getReturnFlights() {
-      // let result = [];
-      // for (let flight of this.data.flight.return_flight) {
-      //   const providers = flight.providers.filter(flg => flg.seat >= this.adults);
-      //   if (providers.length) {
-      //     flight.providers = providers;
-      //     result.push(flight);
-      //   }
-      // }
-
-
       try {
-      let result = [];
-      for (let flight of this.data.flight.return_flight) {
-        const providers = flight.providers.filter(flg => flg.seat >= this.adults);
-        if (providers.length) {
-          flight.providers = providers;
-          result.push(flight);
+        if (!this.data?.flight?.return_flight) {
+          console.warn("No return flight data available");
+          return [];
         }
+
+        return this.data.flight.return_flight.reduce((result, flight) => {
+          const providers = flight.providers.filter(flg => flg.seat >= this.adults);
+          if (providers.length) {
+            result.push({
+              ...flight,
+              providers
+            });
+          }
+          return result;
+        }, []);
+
+      } catch (error) {
+        console.error("Error in getReturnFlights:", error);
+        return [];
       }
-      
-      return result; // Return the filtered flights
-
-    } catch (error) {
-      console.error("An error occurred while getting return flights:", error);
-      //this.showError("خطایی در دریافت اطلاعات پروازها رخ داده است. لطفا مجددا تلاش کنید.");
-      return []; // Return an empty array or handle the error appropriately
-    }
-
-
-
-      // return this.data.flight.return_flight;
     },
     setGoFlight(index, provider_index) {
       this.go_flight_index = index;
@@ -632,41 +589,43 @@ export default {
     },
     closeAnalysis(val) {
       return this.show_analysis = val;
+    },
+    sortHotels() {
+      this.hotels = this.hotels.sort((a, b) => {
+        if (this.filter.orderBy === "price_a") {
+          return a.min_price - b.min_price;
+        } else if (this.filter.orderBy === "price_d") {
+          return b.min_price - a.min_price;
+        } else if (this.filter.orderBy === "hour_d_a") {
+          const aTime = this.go_flight[this.go_flight_index]?.go_time || "00:00";
+          const bTime = this.go_flight[this.go_flight_index]?.go_time || "00:00";
+          const aMinutes = parseInt(aTime.split(':')[0]) * 60 + parseInt(aTime.split(':')[1]);
+          const bMinutes = parseInt(bTime.split(':')[0]) * 60 + parseInt(bTime.split(':')[1]);
+          return aMinutes - bMinutes;
+        } else if (this.filter.orderBy === "hour_d_d") {
+          const aTime = this.go_flight[this.go_flight_index]?.go_time || "00:00";
+          const bTime = this.go_flight[this.go_flight_index]?.go_time || "00:00";
+          const aMinutes = parseInt(aTime.split(':')[0]) * 60 + parseInt(aTime.split(':')[1]);
+          const bMinutes = parseInt(bTime.split(':')[0]) * 60 + parseInt(bTime.split(':')[1]);
+          return bMinutes - aMinutes;
+        }
+        return 0;
+      });
     }
   },
   created() {
-
-    // hazf kardim
-    this.hotels = this.hotels.sort((a, b) => a.min_price - b.min_price);
-    //=============
-
-    console.log("hotel length ==="+self.hotels);
-
-    // console.log(this.hotels);
-    // ---- go flight
-    let go_flight_result = [];
-    for (let go_flight_item of this.go_flight) {
-      const go_providers = go_flight_item.providers.filter(pv => pv.seat >= this.adults);
-      if (go_providers.length) {
-        go_flight_item.providers = go_providers;
-        go_flight_result.push(go_flight_item);
-      }
-    }
-    this.go_flight = go_flight_result;
-    // ---- return flight
-    let return_flight_result = [];
-    for (let return_flight_item of this.return_flight) {
-      const return_providers = return_flight_item.providers.filter(pv => pv.seat >= this.adults);
-      if (return_providers.length) {
-        return_flight_item.providers = return_providers;
-        return_flight_result.push(return_flight_item);
-      }
-    }
-    this.return_flight = return_flight_result;
-    // ----
-    this.calc_last_search();
+    this.initializeData();
   },
   watch: {
+    data: {
+      handler(newData) {
+        if (newData && Object.keys(newData).length > 0) {
+          this.initializeData();
+        }
+      },
+      deep: true,
+      immediate: true
+    },
     "filter.hotel": function (val) {
       let result = []
       if (val.length) {
@@ -681,6 +640,13 @@ export default {
         console.log('empty', this.static_hotels);
         this.hotels = this.static_hotels;
       }
+      this.sortHotels();
+    },
+    hotels: {
+      handler() {
+        this.sortHotels();
+      },
+      deep: true
     }
   },
   unmounted() {
@@ -771,6 +737,14 @@ export default {
 .form-select {
   font-size: 0.85rem;
   padding: 0.5rem;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: none !important;
+}
+
+.form-select::-ms-expand {
+  display: none;
 }
 
 .sticky-top {
