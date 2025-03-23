@@ -4,24 +4,29 @@
       <!-- --- FILTER --- -->
       <div class="col-12 col-md-3">
         <div class="sticky-top">
-          <div class="row align-items-center bg-white py-3 rounded">
-
-
+          <div class="row align-items-center bg-white p-3 rounded">
             <!-- --- تحلیل هتل --- -->
             <div class="col-12">
-              <label for="analysis_star" class="text-muted mb-1">تحلیل هتل ها</label>
-              <v-select multiple :options="['1', '2','3','4','5']" v-model="filter.hotelstarAnalysis"></v-select>
-            <!-- دکمه استخراج تحلیل -->
-              <button class="btn btn-success mt-2" @click="extractAnalysis">
-                استخراج تحلیل
-              </button>
-
+              <div class="d-flex flex-column">
+                <label for="analysis_star" class="text-muted mb-2">تحلیل هتل ها</label>
+                <div class="d-flex gap-2 align-items-center">
+                  <v-select multiple 
+                          :options="['1', '2','3','4','5']" 
+                          v-model="filter.hotelstarAnalysis"
+                          class="flex-grow-1 hotel-select"
+                          placeholder="انتخاب ستاره هتل">
+                  </v-select>
+                  <button class="btn btn-success px-3 analysis-btn" @click="extractAnalysis">
+                    <i class="bi bi-search me-1"></i>
+                    تحلیل
+                  </button>
+                </div>
+              </div>
             </div>
 
-
             <!-- --- NAME --- -->
-            <div class="col-12">
-              <label for="filter_name" class="text-muted mb-1">هتل</label>
+            <div class="col-12 mt-3">
+              <label for="filter_name" class="text-muted mb-2">هتل</label>
               <v-select multiple 
                       :options="hotelOptions" 
                       v-model="filter.hotel" 
@@ -31,9 +36,10 @@
                       class="hotel-select">
               </v-select>
             </div>
+
             <!-- --- SORT --- -->
             <div class="col-12 mt-3">
-              <label for="order_by_filter" class="text-muted mb-1">مرتب سازی</label>
+              <label for="order_by_filter" class="text-muted mb-2">مرتب سازی</label>
               <select class="form-select" id="order_by_filter">
                 <option value="price_a">قیمت - کم به زیاد</option>
                 <option value="price_d">قیمت - زیاد به کم</option>
@@ -41,31 +47,31 @@
                 <option value="hour_d_d">ساعت پرواز - شب به صبح</option>
               </select>
             </div>
-            <!-- --- ANALYSE --- -->
+
+            <!-- --- ANALYSE BUTTON --- -->
             <div class="col-12 mt-3">
-              <button class="btn btn-primary" :disabled="analysis_loading" v-on:click="show_analysis = !show_analysis">
+              <button class="btn btn-primary w-100" :disabled="analysis_loading" v-on:click="show_analysis = !show_analysis">
+                <i class="fa fa-chart-line me-1"></i>
+                <span>آنالیز هتلی</span>
                 <i class="fa fa-spinner fa-spin ms-1" v-if="analysis_loading"></i>
-                <span>انالیز هتلی</span>
               </button>
             </div>
+
             <build-tour-analyse v-if="show_analysis" @closeAnalysis="closeAnalysis"
-                                :data="analysis_data" :adults="adults"></build-tour-analyse>
+                              :data="analysis_data" :adults="adults">
+            </build-tour-analyse>
           </div>
+
           <!-- --- LAST UPDATE --- -->
-          <div class="row mt-3 bg-white rounded p-3 align-items-center">
+          <div class="row mt-3 bg-white rounded p-3">
             <div class="col-6">
-              <p class="m-0">آخرین بروزرسانی : </p>
+              <p class="m-0 text-muted">آخرین بروزرسانی:</p>
             </div>
             <div class="col-5">
               <p class="m-0">{{ last_search.minute }} {{ last_search.text }} پیش</p>
             </div>
             <div class="col-1 text-danger" v-if="last_search.warning">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                   class="bi bi-exclamation-circle" viewBox="0 0 16 16">
-                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                <path
-                    d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/>
-              </svg>
+              <i class="bi bi-exclamation-circle"></i>
             </div>
           </div>
         </div>
@@ -707,6 +713,7 @@ export default {
   padding: 4px 8px;
   border-radius: 4px;
   border: 1px solid #ced4da;
+  background-color: #fff;
 }
 
 .hotel-select ::v-deep .vs__selected {
@@ -714,20 +721,59 @@ export default {
   padding: 0 8px;
   background: #e9ecef;
   border-radius: 4px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .hotel-select ::v-deep .vs__dropdown-menu {
   text-align: right;
+  font-size: 0.85rem;
 }
 
 .hotel-select ::v-deep .vs__dropdown-option {
-  font-size: 0.9rem;
-  padding: 6px 12px;
+  font-size: 0.85rem;
+  padding: 8px 12px;
 }
 
 .hotel-select ::v-deep .vs__search {
   margin: 0;
+  font-size: 0.85rem;
+}
+
+.analysis-btn {
+  height: 38px;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.btn {
   font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.btn-success {
+  background-color: #198754;
+  border-color: #198754;
+}
+
+.form-select {
+  font-size: 0.85rem;
+  padding: 0.5rem;
+}
+
+.sticky-top {
+  top: 1rem;
 }
 </style>

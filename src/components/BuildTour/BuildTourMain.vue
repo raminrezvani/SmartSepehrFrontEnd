@@ -1,291 +1,209 @@
 <template>
-  <main class="container my-3">
+  <main class="container my-4">
     <!-- --- SEARCH --- -->
-    <div class="row align-items-end">
-      <!-- --- SOURCE --- -->
-      <div class="col-12 col-xl-4">
-        <div class="d-flex justify-content-between align-items-center">
-          <label for="build_tour_source" class="text-muted">مبدا</label>
-          <button class="btn btn-sm" v-if="body.target === 'GSM'" data-bs-toggle="modal"
-                  data-bs-target="#alertTargetModal">
-            <svg width="16" height="16"
-                 fill="currentColor"
-                 class="bi bi-exclamation-circle text-danger me-1" viewBox="0 0 16 16">
-              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-              <path
-                  d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/>
-            </svg>
-          </button>
-        </div>
-        <select name="build_tour_source" id="build_tour_source" class="form-select form-select-sm mt-2"
-                v-model="body.source" v-on:change="getCalendarData">
-          <option value="MHD">مشهد</option>
-          <option value="THR">تهران</option>
-          <option value="IFN">اصفهان</option>
-          <option value="SYZ">شیراز</option>
-          <option value="TBZ">تبریز</option>
-          <option value="GSM">قشم</option>
-          <option value="KIH">کیش</option>
-          <option value="AZD">یزد</option>
-          <option value="AWZ">اهواز</option>
-          <option value="BND">بندرعباس</option>
-          <option value="KER">کرمان</option>
-          <option value="KSH">کرمانشاه</option>
-          <option value="RAS">رشت</option>
-          <option value="SRY">ساری</option>
-          <option value="ZBR">چابهار</option>
-          <!-- <option value="DXB">دبی</option>
-          <option value="IST">استانبول</option>   -->
-   
-          <option value="ABD">آبادان</option>
-          <option value="BUZ">بوشهر</option>
-          <option value="GBT">گرگان</option>
-          <option value="OMH">ارومیه</option>
-          <option value="ADU">اردبیل</option>
-          <option value="HDM">همدان</option>
-          <option value="RZR">رامسر</option>
-          <option value="KHD">خرم آباد</option>
-          <!-- <option value="NSH">نوشهر</option> -->
-          
-
-
-
-        </select>
-      </div>
-
-
-      
-
-      <!-- --- Target --- -->
-      <div class="col-12 col-xl-4">
-        <div class="d-flex justify-content-between align-items-center">
-          <label for="build_tour_target" class="text-muted">مقصد</label>
-          <button class="btn btn-sm" v-if="body.target === 'GSM'" data-bs-toggle="modal"
-                  data-bs-target="#alertTargetModal">
-            <svg width="16" height="16"
-                 fill="currentColor"
-                 class="bi bi-exclamation-circle text-danger me-1" viewBox="0 0 16 16">
-              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-              <path
-                  d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/>
-            </svg>
-          </button>
-        </div>
-        <select name="build_tour_target" id="build_tour_target" class="form-select form-select-sm mt-2"
-                v-model="body.target" v-on:change="getCalendarData">
-          <!-- <option value="KIH">کیش</option>
-          <option value="GSM">قشم</option>
-          <option value="THR">تهران</option>
-          <option value="IFN">اصفهان</option>
-          <option value="SYZ">شیراز</option>
-          <option value="TBZ">تبریز</option>
-          <option value="MHD">مشهد</option> 
-          <option value="DXB">دبی</option>
-          <option value="IST">استانبول</option> -->
-
-          <option value="MHD">مشهد</option>
-          <option value="THR">تهران</option>
-          <option value="IFN">اصفهان</option>
-          <option value="SYZ">شیراز</option>
-          <option value="TBZ">تبریز</option>
-          <option value="GSM">قشم</option>
-          <option value="KIH">کیش</option>
-          <option value="AZD">یزد</option>
-          <option value="AWZ">اهواز</option>
-          <option value="BND">بندرعباس</option>
-          <option value="KER">کرمان</option>
-          <option value="KSH">کرمانشاه</option>
-          <option value="RAS">رشت</option>
-          <option value="SRY">ساری</option>
-          <option value="ZBR">چابهار</option>
-           <!-- <option value="DXB">دبی</option>
-          <option value="IST">استانبول</option>   -->
-
-          <option value="ABD">آبادان</option>
-          <option value="BUZ">بوشهر</option>
-          <option value="GBT">گرگان</option>
-          <option value="OMH">ارومیه</option>
-          <option value="ADU">اردبیل</option>
-          <option value="HDM">همدان</option>
-          <option value="RZR">رامسر</option>
-          <option value="KHD">خرم آباد</option>
-          <!-- <option value="NSH">نوشهر</option> -->
-
-
-        </select>
-      </div>
-
-
-      
-
-      <!-- --- GO DATE DESKTOP --- -->
-      <div class="d-none d-lg-block col-lg-3 mt-3 mt-lg-0">
-        <div class="d-flex justify-content-between align-items-center">
-          <label for="date" class="text-muted mb-1">تاریخ</label>
-        </div>  
-        <calender-index
-            key="go_date"
-            placeholder="تاریخ رفت"
-            :show="show_datepicker"
-            :disable-old="true"
-            :days_data="calendar_data.go"
-            @submitted="goDateSubmit"
-            @showing="datePickerShowing"
-        />
-      </div>
-      <!-- --- BACK DATE DESKTOP --- -->
-      <div class="d-none d-lg-block col-lg-3 mt-3 mt-lg-0">
-        <div class="d-flex justify-content-between align-items-center">
-          <label for="night_count" class="text-muted">تاریخ برگشت</label>
-          <p class="m-0">
-            <span>{{ body.night_count }}</span>
-            <span class="me-1">شب</span>
-          </p>
-        </div>
-        <calender-index
-            key="back_date"
-            placeholder="تاریخ برگشت"
-            :show="show_datepicker"
-            :disable-old="true"
-            :days_data="calendar_data.return"
-            @submitted="returnDateSubmit"
-            @showing="datePickerShowing"
-        />
-      </div>
-      <!-- --- GO DATE MOBILE --- -->
-      <div class="col-12 d-lg-none mt-3 mt-lg-0">
-        <div class="d-flex justify-content-between align-items-center">
-          <label for="date" class="text-muted mb-1">تاریخ</label>
-        </div>
-        <calender-index
-            key="go_date"
-            placeholder="تاریخ رفت"
-            :show="show_datepicker_go"
-            :disable-old="true"
-            :days_data="calendar_data.go"
-            @submitted="goDateSubmit"
-            @showing="datePickerShowing"
-        />
-      </div>
-      <!-- --- BACK DATE MOBILE --- -->
-      <div class="col-12 d-lg-none mt-3 mt-lg-0">
-        <div class="d-flex justify-content-between align-items-center">
-          <label for="night_count" class="text-muted">تاریخ برگشت</label>
-          <p class="m-0">
-            <span>{{ body.night_count }}</span>
-            <span class="me-1">شب</span>
-          </p>
-        </div>
-        <calender-index
-            key="back_date"
-            placeholder="تاریخ برگشت"
-            :show="show_datepicker_return"
-            :disable-old="true"
-            :days_data="calendar_data.return"
-            @submitted="returnDateSubmit"
-            @showing="datePickerShowing"
-        />
-      </div>
-      <!-- --- MODAL --- -->
-      <div class="modal fade" id="alertTargetModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabel">ملاحظات</h1>
-            </div>
-            <div class="modal-body" style="line-height: 2">
-              <p class="m-0 lh-2">برای تور دست ساز قشم٬ فقط روز های دوشنبه٬ سه شنبه٬ پنج شنبه و جمعه مجاز به جستجو
-                میباشند.</p>
-            </div>
+    <div class="search-section bg-white rounded-3 p-4 shadow-sm">
+      <div class="row g-3">
+        <!-- --- SOURCE --- -->
+        <div class="col-12 col-md-6 col-lg-2">
+          <div class="form-group">
+            <label for="build_tour_source" class="text-muted mb-2">مبدا</label>
+            <select name="build_tour_source" id="build_tour_source" 
+                    class="form-select" 
+                    v-model="body.source" 
+                    v-on:change="getCalendarData">
+              <option value="MHD">مشهد</option>
+              <option value="THR">تهران</option>
+              <option value="IFN">اصفهان</option>
+              <option value="SYZ">شیراز</option>
+              <option value="TBZ">تبریز</option>
+              <option value="GSM">قشم</option>
+              <option value="KIH">کیش</option>
+              <option value="AZD">یزد</option>
+              <option value="AWZ">اهواز</option>
+              <option value="BND">بندرعباس</option>
+              <option value="KER">کرمان</option>
+              <option value="KSH">کرمانشاه</option>
+              <option value="RAS">رشت</option>
+              <option value="SRY">ساری</option>
+              <option value="ZBR">چابهار</option>
+              <option value="ABD">آبادان</option>
+              <option value="BUZ">بوشهر</option>
+              <option value="GBT">گرگان</option>
+              <option value="OMH">ارومیه</option>
+              <option value="ADU">اردبیل</option>
+              <option value="HDM">همدان</option>
+              <option value="RZR">رامسر</option>
+              <option value="KHD">خرم آباد</option>
+            </select>
           </div>
         </div>
-      </div>
-      <!-- --- SUBMIT --- -->
-      <div class="col-12 col-lg-2 mt-3 mt-lg-0">
-        <button class="btn btn-sm btn-success w-100" :disabled="loading" v-on:click="getData(true)">جستجو</button>
-      </div>
 
-      <!-- --- NO CACHE BUTTON --- -->
-      <div class="col-12 mt-3">
-        <button class="btn btn-success w-100" v-on:click="getData(false)">بروزرسانی زنده</button>
-      </div>
-
-
-
-
-      
-      <!-- --- PROVIDER --- -->
-      <div class="col-12 col-md-6 mt-3">
-        <div class="position-relative border rounded p-2 bg-white">
-          <div class="cursor-pointer h-100 w-100" v-on:click="show_provider = !show_provider">
-            <p class="m-0">تامین کنندگان</p>
+        <!-- --- Target --- -->
+        <div class="col-12 col-md-6 col-lg-2">
+          <div class="form-group">
+            <label for="build_tour_target" class="text-muted mb-2">مقصد</label>
+            <select name="build_tour_target" id="build_tour_target" 
+                    class="form-select" 
+                    v-model="body.target" 
+                    v-on:change="getCalendarData">
+              <option value="MHD">مشهد</option>
+              <option value="THR">تهران</option>
+              <option value="IFN">اصفهان</option>
+              <option value="SYZ">شیراز</option>
+              <option value="TBZ">تبریز</option>
+              <option value="GSM">قشم</option>
+              <option value="KIH">کیش</option>
+              <option value="AZD">یزد</option>
+              <option value="AWZ">اهواز</option>
+              <option value="BND">بندرعباس</option>
+              <option value="KER">کرمان</option>
+              <option value="KSH">کرمانشاه</option>
+              <option value="RAS">رشت</option>
+              <option value="SRY">ساری</option>
+              <option value="ZBR">چابهار</option>
+              <option value="ABD">آبادان</option>
+              <option value="BUZ">بوشهر</option>
+              <option value="GBT">گرگان</option>
+              <option value="OMH">ارومیه</option>
+              <option value="ADU">اردبیل</option>
+              <option value="HDM">همدان</option>
+              <option value="RZR">رامسر</option>
+              <option value="KHD">خرم آباد</option>
+            </select>
           </div>
-          <div class="provider-overlay" v-if="show_provider" v-on:click="show_provider = false"></div>
-          <div class="position-absolute w-100 p-3 provider-item bg-white rounded border" v-if="show_provider">
-            <div class="d-flex justify-content-between align-items-center position-relative">
-              <div>
-                <input type="checkbox" id="filter_provider_all" class="form-check-input" :value="true"
-                        v-model="allProviderFilter" v-on:change="allProviderFilterMethod">
-                <label for="filter_provider_all" class="form-check-label me-1">همه</label>
-              </div>
-              <div class="m-0 d-flex justify-content-between align-items-center tooltip-custom-main">
-                {{ allProviderLength }}
-              </div>
+        </div>
+
+        <!-- --- GO DATE --- -->
+        <div class="col-12 col-md-6 col-lg-2">
+          <div class="form-group">
+            <label class="text-muted mb-2">تاریخ رفت</label>
+            <calender-index
+                key="go_date"
+                placeholder="تاریخ رفت"
+                :show="show_datepicker"
+                :disable-old="true"
+                :days_data="calendar_data.go"
+                @submitted="goDateSubmit"
+                @showing="datePickerShowing"
+                class="date-picker"
+            />
+          </div>
+        </div>
+
+        <!-- --- BACK DATE --- -->
+        <div class="col-12 col-md-6 col-lg-2">
+          <div class="form-group">
+            <div class="d-flex justify-content-between">
+              <label class="text-muted mb-2">تاریخ برگشت</label>
+              <span class="text-muted small">{{ body.night_count }} شب</span>
             </div>
-            <div class="providers-list" style="max-height: 300px; overflow-y: auto;">
-              <div class="d-flex justify-content-between align-items-center mt-3 position-relative"
-                    v-for="(provider, index) of providerLength" :key="index">
-                <div>
-                  <input type="checkbox" :id="`filter_provider_${provider.name}`" class="form-check-input"
-                          :value="true" :data-value="filter_provider[provider.name]"
-                          v-model="filter_provider[provider.name]" v-on:change="sortedData">
-                  <label :for="`filter_provider_${provider.name}`" class="form-check-label me-1">
-                    <a :href="provider.url" target="_blank" class="m-0 link-dark">{{ provider.name }}</a>
-                  </label>
+            <calender-index
+                key="back_date"
+                placeholder="تاریخ برگشت"
+                :show="show_datepicker"
+                :disable-old="true"
+                :days_data="calendar_data.return"
+                @submitted="returnDateSubmit"
+                @showing="datePickerShowing"
+                class="date-picker"
+            />
+          </div>
+        </div>
+
+        <!-- --- STAR --- -->
+        <div class="col-12 col-md-6 col-lg-2">
+          <div class="form-group">
+            <label for="filter_star" class="text-muted mb-2">ستاره هتل</label>
+            <select v-model="filter_star" class="form-select" id="filter_star" @change="sortedData">
+              <option value="all">همه</option>
+              <option value="1">۱ ستاره</option>
+              <option value="2">۲ ستاره</option>
+              <option value="3">۳ ستاره</option>
+              <option value="4">۴ ستاره</option>
+              <option value="5">۵ ستاره</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- --- PROVIDER --- -->
+        <div class="col-12 col-md-6 col-lg-2">
+          <div class="form-group">
+            <label class="text-muted mb-2">تامین کنندگان</label>
+            <div class="position-relative">
+              <div class="provider-selector" @click="show_provider = !show_provider">
+                <div class="d-flex justify-content-between align-items-center p-2 border rounded">
+                  <span>{{ allProviderLength }} تامین کننده</span>
+                  <i class="bi" :class="show_provider ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
                 </div>
-                <div class="m-0 d-flex justify-content-between align-items-center tooltip-custom-main">
-                  <p>{{ provider.count }}</p>
-                  <svg v-if="provider.count === 0" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-                        fill="currentColor"
-                        class="bi bi-exclamation-circle text-danger me-1" viewBox="0 0 16 16">
-                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                    <path
-                        d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/>
-                  </svg>
-                  <div v-if="provider.count === 0" class="position-absolute p-2 tooltip-custom">
-                    {{ provider.message }}
+              </div>
+              
+              <div class="provider-overlay" v-if="show_provider" @click="show_provider = false"></div>
+              
+              <div class="provider-dropdown" v-if="show_provider">
+                <div class="provider-header">
+                  <div class="form-check d-flex justify-content-between align-items-center">
+                    <div>
+                      <input type="checkbox" id="filter_provider_all" class="form-check-input" 
+                             :value="true" v-model="allProviderFilter" 
+                             @change="allProviderFilterMethod">
+                      <label for="filter_provider_all" class="form-check-label">همه</label>
+                    </div>
+                    <span class="badge bg-primary">{{ allProviderLength }}</span>
+                  </div>
+                </div>
+                
+                <div class="providers-list">
+                  <div class="provider-item" v-for="(provider, index) of providerLength" :key="index">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div class="form-check">
+                        <input type="checkbox" :id="`filter_provider_${provider.name}`" 
+                               class="form-check-input" :value="true"
+                               v-model="filter_provider[provider.name]" 
+                               @change="sortedData">
+                        <label :for="`filter_provider_${provider.name}`" class="form-check-label">
+                          {{ provider.name }}
+                        </label>
+                      </div>
+                      <span class="badge" :class="provider.count > 0 ? 'bg-success' : 'bg-danger'">
+                        {{ provider.count }}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- --- BUTTONS --- -->
+        <div class="col-12 mt-3">
+          <div class="d-flex gap-2">
+            <button class="btn btn-primary flex-grow-1" :disabled="loading" @click="getData(true)">
+              <i class="bi bi-search me-1"></i>
+              جستجو
+            </button>
+            <button class="btn btn-outline-primary flex-grow-1" @click="getData(false)">
+              <i class="bi bi-arrow-clockwise me-1"></i>
+              بروزرسانی زنده
+            </button>
+          </div>
+        </div>
       </div>
-
-            <!-- --- STAR --- -->
-      <div class="col-12">
-        <label for="filter_star" class="text-muted mb-1">ستاره هتل</label>
-        <select v-model="filter_star" class="form-select" id="filter_star" @change="sortedData">
-          <option value="all">همه</option>
-          <option value="1">۱ ستاره</option>
-          <option value="2">۲ ستاره</option>
-          <option value="3">۳ ستاره</option>
-          <option value="4">۴ ستاره</option>
-          <option value="5">۵ ستاره</option>
-        </select>
-      </div>
-
-
     </div>
-    <hr>
-
-
 
     <!-- --- MAIN --- -->
-    <section>
+    <section class="mt-4">
       <build-loading v-if="loading"></build-loading>
-      <build-result v-if="show_result"    :key="dataKey"       :data="data" :adults="parseInt(this.body.adults)"
-                    :target="body.target"  :body="this.body" :source="body.source" :analysis_data="analyse_data" :analysis_loading="show_analyse_loading"></build-result>
+      <build-result v-if="show_result" 
+                   :key="dataKey" 
+                   :data="data" 
+                   :adults="parseInt(this.body.adults)"
+                   :target="body.target" 
+                   :body="this.body" 
+                   :source="body.source" 
+                   :analysis_data="analyse_data" 
+                   :analysis_loading="show_analyse_loading">
+      </build-result>
     </section>
   </main>
 </template>
@@ -975,10 +893,93 @@ export default {
 </script>
 
 <style scoped>
+.search-section {
+  border: 1px solid #e9ecef;
+}
+
+.form-group {
+  margin-bottom: 0;
+}
+
+.form-select {
+  font-size: 0.9rem;
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+  background-color: #fff;
+}
+
+.date-picker {
+  width: 100%;
+}
+
+.provider-selector {
+  cursor: pointer;
+}
+
+.provider-selector:hover {
+  opacity: 0.9;
+}
+
+.provider-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  z-index: 1001;
+}
+
+.provider-header {
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.providers-list {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.provider-item {
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.provider-item:hover {
+  background-color: #f8f9fa;
+}
+
+.provider-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Scrollbar Styling */
 .providers-list {
   scrollbar-width: thin;
   scrollbar-color: #888 #f1f1f1;
-  margin-top: 10px;
 }
 
 .providers-list::-webkit-scrollbar {
@@ -997,20 +998,5 @@ export default {
 
 .providers-list::-webkit-scrollbar-thumb:hover {
   background: #555;
-}
-
-.provider-item {
-  max-height: 400px;
-  z-index: 1000;
-}
-
-.provider-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 999;
 }
 </style>
