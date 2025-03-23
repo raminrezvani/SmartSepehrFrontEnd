@@ -22,7 +22,14 @@
             <!-- --- NAME --- -->
             <div class="col-12">
               <label for="filter_name" class="text-muted mb-1">هتل</label>
-              <v-select multiple :options="hotel_names" v-model="filter.hotel"></v-select>
+              <v-select multiple 
+                      :options="hotelOptions" 
+                      v-model="filter.hotel" 
+                      :reduce="hotel => hotel.value"
+                      label="label"
+                      placeholder="انتخاب هتل"
+                      class="hotel-select">
+              </v-select>
             </div>
             <!-- --- SORT --- -->
             <div class="col-12 mt-3">
@@ -672,6 +679,15 @@ export default {
   },
   unmounted() {
     clearInterval(this.last_search.interval);
+  },
+  computed: {
+    hotelOptions() {
+      if (!this.data || !this.data.hotel) return [];
+      return this.data.hotel.map(hotel => ({
+        label: `${hotel.hotel_name} (${hotel.hotel_star} ستاره)`,
+        value: hotel.hotel_name
+      }));
+    }
   }
 }
 </script>
@@ -680,5 +696,38 @@ export default {
 .flight-active {
   background: #c0e3ca !important;
   transition: all .5s;
+}
+
+.hotel-select {
+  direction: rtl;
+  text-align: right;
+}
+
+.hotel-select ::v-deep .vs__dropdown-toggle {
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+}
+
+.hotel-select ::v-deep .vs__selected {
+  margin: 0 2px;
+  padding: 0 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.hotel-select ::v-deep .vs__dropdown-menu {
+  text-align: right;
+}
+
+.hotel-select ::v-deep .vs__dropdown-option {
+  font-size: 0.9rem;
+  padding: 6px 12px;
+}
+
+.hotel-select ::v-deep .vs__search {
+  margin: 0;
+  font-size: 0.9rem;
 }
 </style>
