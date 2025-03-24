@@ -19,7 +19,7 @@
                   <button class="btn btn-success px-3 analysis-btn" @click="extractAnalysis">
                     <i class="bi bi-search me-1"></i>
                     تحلیل
-                  </button>
+              </button>
                 </div>
               </div>
             </div>
@@ -43,8 +43,10 @@
               <select class="form-select" id="order_by_filter" v-model="filter.orderBy" @change="sortHotels">
                 <option value="price_a">قیمت - کم به زیاد</option>
                 <option value="price_d">قیمت - زیاد به کم</option>
-                <option value="hour_d_a">ساعت پرواز - صبح به شب</option>
-                <option value="hour_d_d">ساعت پرواز - شب به صبح</option>
+                <option value="go_time_a">ساعت پرواز رفت - کم به زیاد</option>
+                <option value="go_time_d">ساعت پرواز رفت - زیاد به کم</option>
+                <option value="return_time_a">ساعت پرواز برگشت - کم به زیاد</option>
+                <option value="return_time_d">ساعت پرواز برگشت - زیاد به کم</option>
               </select>
             </div>
 
@@ -518,7 +520,7 @@ export default {
           return result;
         }, []);
 
-      } catch (error) {
+    } catch (error) {
         console.error("Error in getGoFlights:", error);
         return [];
       }
@@ -541,10 +543,10 @@ export default {
           return result;
         }, []);
 
-      } catch (error) {
+    } catch (error) {
         console.error("Error in getReturnFlights:", error);
         return [];
-      }
+    }
     },
     setGoFlight(index, provider_index) {
       this.go_flight_index = index;
@@ -591,25 +593,140 @@ export default {
       return this.show_analysis = val;
     },
     sortHotels() {
-      this.hotels = this.hotels.sort((a, b) => {
-        if (this.filter.orderBy === "price_a") {
-          return a.min_price - b.min_price;
-        } else if (this.filter.orderBy === "price_d") {
-          return b.min_price - a.min_price;
-        } else if (this.filter.orderBy === "hour_d_a") {
-          const aTime = this.go_flight[this.go_flight_index]?.go_time || "00:00";
-          const bTime = this.go_flight[this.go_flight_index]?.go_time || "00:00";
-          const aMinutes = parseInt(aTime.split(':')[0]) * 60 + parseInt(aTime.split(':')[1]);
-          const bMinutes = parseInt(bTime.split(':')[0]) * 60 + parseInt(bTime.split(':')[1]);
-          return aMinutes - bMinutes;
-        } else if (this.filter.orderBy === "hour_d_d") {
-          const aTime = this.go_flight[this.go_flight_index]?.go_time || "00:00";
-          const bTime = this.go_flight[this.go_flight_index]?.go_time || "00:00";
-          const aMinutes = parseInt(aTime.split(':')[0]) * 60 + parseInt(aTime.split(':')[1]);
-          const bMinutes = parseInt(bTime.split(':')[0]) * 60 + parseInt(bTime.split(':')[1]);
-          return bMinutes - aMinutes;
+      if (!this.hotels.length) return;
+      
+      // Handle price sorting
+      if (this.filter.orderBy === "price_a" || this.filter.orderBy === "price_d") {
+        // Calculate total price for each hotel
+        const hotelPrices = this.hotels.map(hotel => {
+          const goFlight = this.go_flight[this.go_flight_index];
+          const returnFlight = this.return_flight[this.return_flight_index];
+          
+          let goPrice = 0;
+          let returnPrice = 0;
+          
+          // Find go flight price for this hotel
+          if (goFlight && goFlight.providers) {
+            const hotelProvider = goFlight.providers.find(p => p.hotel_id === hotel.id);
+            if (hotelProvider) {
+              goPrice = hotelProvider.price;
+            }
+          }
+          
+          // Find return flight price for this hotel
+          if (returnFlight && returnFlight.providers) {
+            const hotelProvider = returnFlight.providers.find(p => p.hotel_id === hotel.id);
+            if (hotelProvider) {
+              returnPrice = hotelProvider.price;
+            }
+          }
+          
+          // Calculate total price including hotel price
+          const flightPrice = (goPrice + returnPrice) * this.adults;
+          const hotelPrice = hotel.min_price * this.adults;
+          const totalPrice = flightPrice + hotelPrice;
+          
+          return {
+            hotel,
+            totalPrice
+          };
+        });
+        
+        // Sort hotels based on total price
+        hotelPrices.sort((a, b) => {
+          if (this.filter.orderBy === "price_a") {
+            return a.totalPrice - b.totalPrice;
+          } else {
+            return b.totalPrice - a.totalPrice;
+          }
+        });
+        
+        // Update hotels array with sorted order
+        this.hotels = hotelPrices.map(item => item.hotel);
+        return;
+      }
+      
+      // Handle flight time sorting
+      this.hotels.forEach(hotel => {
+        // Handle go flights
+        if (this.filter.orderBy === "go_time_a" || this.filter.orderBy === "go_time_d") {
+          let selectedFlightIndex = -1;
+          let selectedProviderIndex = -1;
+          let selectedTime = this.filter.orderBy === "go_time_a" ? "23:59" : "00:00";
+          
+          // Search through all go flights
+          this.go_flight.forEach((flight, flightIndex) => {
+            flight.providers.forEach((provider, providerIndex) => {
+              if (provider.hotel_id === hotel.id) {
+                const currentTime = provider.go_time || "00:00";
+                const currentMinutes = parseInt(currentTime.split(':')[0]) * 60 + parseInt(currentTime.split(':')[1]);
+                const selectedMinutes = parseInt(selectedTime.split(':')[0]) * 60 + parseInt(selectedTime.split(':')[1]);
+                
+                if (this.filter.orderBy === "go_time_a") {
+                  // Find earliest time
+                  if (currentMinutes < selectedMinutes) {
+                    selectedTime = currentTime;
+                    selectedFlightIndex = flightIndex;
+                    selectedProviderIndex = providerIndex;
+                  }
+                } else {
+                  // Find latest time
+                  if (currentMinutes > selectedMinutes) {
+                    selectedTime = currentTime;
+                    selectedFlightIndex = flightIndex;
+                    selectedProviderIndex = providerIndex;
+                  }
+                }
+              }
+            });
+          });
+          
+          // Update the selected flight if found
+          if (selectedFlightIndex !== -1) {
+            this.go_flight_index = selectedFlightIndex;
+            this.go_flight_provider_index = selectedProviderIndex;
+          }
         }
-        return 0;
+        
+        // Handle return flights
+        if (this.filter.orderBy === "return_time_a" || this.filter.orderBy === "return_time_d") {
+          let selectedFlightIndex = -1;
+          let selectedProviderIndex = -1;
+          let selectedTime = this.filter.orderBy === "return_time_a" ? "23:59" : "00:00";
+          
+          // Search through all return flights
+          this.return_flight.forEach((flight, flightIndex) => {
+            flight.providers.forEach((provider, providerIndex) => {
+              if (provider.hotel_id === hotel.id) {
+                const currentTime = provider.return_time || "00:00";
+                const currentMinutes = parseInt(currentTime.split(':')[0]) * 60 + parseInt(currentTime.split(':')[1]);
+                const selectedMinutes = parseInt(selectedTime.split(':')[0]) * 60 + parseInt(selectedTime.split(':')[1]);
+                
+                if (this.filter.orderBy === "return_time_a") {
+                  // Find earliest time
+                  if (currentMinutes < selectedMinutes) {
+                    selectedTime = currentTime;
+                    selectedFlightIndex = flightIndex;
+                    selectedProviderIndex = providerIndex;
+                  }
+                } else {
+                  // Find latest time
+                  if (currentMinutes > selectedMinutes) {
+                    selectedTime = currentTime;
+                    selectedFlightIndex = flightIndex;
+                    selectedProviderIndex = providerIndex;
+                  }
+                }
+              }
+            });
+          });
+          
+          // Update the selected flight if found
+          if (selectedFlightIndex !== -1) {
+            this.return_flight_index = selectedFlightIndex;
+            this.return_flight_provider_index = selectedProviderIndex;
+          }
+        }
       });
     }
   },
