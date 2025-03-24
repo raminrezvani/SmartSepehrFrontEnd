@@ -478,31 +478,69 @@ export default {
       }
     },
     sortedData() {
-      console.log(this.fixed_data)
       const data = this.filterProvider();
-      console.log(data)
-      console.log( this.fixed_data)  // all of data
-      // const data = this.getSortedData(this.filterProvider());
-      console.log('this.filter_name.length === '+this.filter_name.length)
+      
+      // Apply sorting based on order_by
+      let sortedData = [...data];
+      switch (this.order_by) {
+        case "price_a": {
+          sortedData.sort((a, b) => parseFloat(a.providers[0].price) - parseFloat(b.providers[0].price));
+          break;
+        }
+        case "price_d": {
+          sortedData.sort((a, b) => parseFloat(b.providers[0].price) - parseFloat(a.providers[0].price));
+          break;
+        }
+        case "hour_d_a": {
+          sortedData.sort((a, b) => {
+            const timeA = a.providers[0].go_flight_arrive_time || '';
+            const timeB = b.providers[0].go_flight_arrive_time || '';
+            return parseInt(timeA.slice(0, 3)) - parseInt(timeB.slice(0, 3));
+          });
+          break;
+        }
+        case "hour_d_d": {
+          sortedData.sort((a, b) => {
+            const timeA = a.providers[0].go_flight_arrive_time || '';
+            const timeB = b.providers[0].go_flight_arrive_time || '';
+            return parseInt(timeB.slice(0, 3)) - parseInt(timeA.slice(0, 3));
+          });
+          break;
+        }
+        case "hour_a_a": {
+          sortedData.sort((a, b) => {
+            const timeA = a.providers[0].return_flight_arrive_time || '';
+            const timeB = b.providers[0].return_flight_arrive_time || '';
+            return parseInt(timeA.slice(0, 3)) - parseInt(timeB.slice(0, 3));
+          });
+          break;
+        }
+        case "hour_a_d": {
+          sortedData.sort((a, b) => {
+            const timeA = a.providers[0].return_flight_arrive_time || '';
+            const timeB = b.providers[0].return_flight_arrive_time || '';
+            return parseInt(timeB.slice(0, 3)) - parseInt(timeA.slice(0, 3));
+          });
+          break;
+        }
+      }
+
       if (this.filter_name.length) {
         let valid_filter_name = Object.values(this.filter_name);
-        const result = data.filter(hotel => valid_filter_name.includes(hotel.hotel_name));
+        const result = sortedData.filter(hotel => valid_filter_name.includes(hotel.hotel_name));
         this.data = result;
         this.dataKey++;
-        console.log( this.data )
         return result;
       } else {
         if (this.filter_star === "all") {
-          const result = data;
+          const result = sortedData;
           this.data = result;
           this.dataKey++;
-          console.log( this.data )
           return result;
         } else {
-          const result = data.filter(hotel => hotel.hotel_star === parseInt(this.filter_star));
+          const result = sortedData.filter(hotel => hotel.hotel_star === parseInt(this.filter_star));
           this.data = result;
           this.dataKey++;
-          console.log( this.data )
           return result;
         }
       }
