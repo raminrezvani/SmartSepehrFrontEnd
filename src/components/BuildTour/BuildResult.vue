@@ -15,6 +15,11 @@
                           v-model="filter.hotelstarAnalysis"
                           class="flex-grow-1 hotel-select"
                           placeholder="انتخاب ستاره هتل">
+                    <template v-slot:option="{ label, value }">
+                      <span :title="getStarErrorMessage(value)" :style="{ cursor: getStarErrorMessage(value) ? 'help' : 'default' }">
+                        {{ label }}
+                      </span>
+                    </template>
                   </v-select>
                   <button class="btn btn-success px-3 analysis-btn" @click="extractAnalysis">
                     <i class="bi bi-search me-1"></i>
@@ -147,14 +152,18 @@
                     </div>
                     <div class="mt-3 d-flex justify-content-between align-items-center">
                       <h5 class="text-center text-danger" v-if="calcGoFlightDif(flight.min_price) > 0">
-                        <span>{{ Number(Math.abs(calcGoFlightDif(flight.min_price))).toLocaleString() }}</span>
+                        <span :title="flight.providers[0]?.message || ''" :style="{ cursor: flight.providers[0]?.message ? 'help' : 'default' }">
+                          {{ Number(Math.abs(calcGoFlightDif(flight.min_price))).toLocaleString() }}
+                        </span>
                         <i class="fa fa-angle-up me-1"></i>
                       </h5>
                       <h5 class="text-center" v-else-if="calcGoFlightDif(flight.min_price) === 0">
-                        <span>0</span>
+                        <span :title="flight.providers[0]?.message || ''" :style="{ cursor: flight.providers[0]?.message ? 'help' : 'default' }">0</span>
                       </h5>
                       <h5 class="text-center text-success" v-else>
-                        <span>{{ Number(Math.abs(calcGoFlightDif(flight.min_price))).toLocaleString() }}</span>
+                        <span :title="flight.providers[0]?.message || ''" :style="{ cursor: flight.providers[0]?.message ? 'help' : 'default' }">
+                          {{ Number(Math.abs(calcGoFlightDif(flight.min_price))).toLocaleString() }}
+                        </span>
                         <i class="fa fa-angle-down me-1"></i>
                       </h5>
                       <button class="btn btn-primary w-50 " data-bs-toggle="collapse"
@@ -172,7 +181,13 @@
                       :class="{'col-12 col-md-4 mt-4': true}"
                       v-for="(provider, providerIndex) in flight.providers" :key="providerIndex">
                     <div
-                        :class="{'border p-3 rounded': true, 'flight-active': go_flight_index === index && providerIndex === go_flight_provider_index}">
+                        :class="{'border p-3 rounded': true, 'flight-active': go_flight_index === index && providerIndex === go_flight_provider_index}"
+                        :title="provider.message || ''"
+                        :style="{
+                          backgroundColor: provider.message ? '#ffebee' : 'transparent',
+                          cursor: provider.message ? 'help' : 'default'
+                        }"
+                    >
                       <div class="d-flex justify-content-between align-items-center">
                         <h5>{{ provider.provider_name }}</h5>
                         <img :src="provider.provider_logo" :alt="provider.provider_name" width="35" height="35">
@@ -195,7 +210,7 @@
                       <hr>
                       <div class="d-flex justify-content-between align-items-center mt-2">
                         <h5>هر نفر :</h5>
-                        <h5>
+                        <h5 :title="provider.message || ''" :style="{ cursor: provider.message ? 'help' : 'default' }">
                           <span>{{ Number(provider.price).toLocaleString() }}</span>
                           <span> تومان </span>
                         </h5>
@@ -203,7 +218,7 @@
                       <hr>
                       <div class="d-flex justify-content-between align-items-center mt-2">
                         <h5>قیمت کل :</h5>
-                        <h5>
+                        <h5 :title="provider.message || ''" :style="{ cursor: provider.message ? 'help' : 'default' }">
                           <span>{{ Number(provider.price * adults).toLocaleString() }}</span>
                           <span> تومان </span>
                         </h5>
@@ -273,14 +288,18 @@
                     </div>
                     <div class="mt-3 d-flex justify-content-between align-items-center">
                       <h5 class="text-center text-danger" v-if="calcReturnFlightDif(flight.min_price) > 0">
-                        <span>{{ Number(Math.abs(calcReturnFlightDif(flight.min_price))).toLocaleString() }}</span>
+                        <span :title="flight.providers[0]?.message || ''" :style="{ cursor: flight.providers[0]?.message ? 'help' : 'default' }">
+                          {{ Number(Math.abs(calcReturnFlightDif(flight.min_price))).toLocaleString() }}
+                        </span>
                         <i class="fa fa-angle-up me-1"></i>
                       </h5>
                       <h5 class="text-center" v-else-if="calcReturnFlightDif(flight.min_price) === 0">
-                        <span>0</span>
+                        <span :title="flight.providers[0]?.message || ''" :style="{ cursor: flight.providers[0]?.message ? 'help' : 'default' }">0</span>
                       </h5>
                       <h5 class="text-center text-success" v-else>
-                        <span>{{ Number(Math.abs(calcReturnFlightDif(flight.min_price))).toLocaleString() }}</span>
+                        <span :title="flight.providers[0]?.message || ''" :style="{ cursor: flight.providers[0]?.message ? 'help' : 'default' }">
+                          {{ Number(Math.abs(calcReturnFlightDif(flight.min_price))).toLocaleString() }}
+                        </span>
                         <i class="fa fa-angle-down me-1"></i>
                       </h5>
                       <button class="btn btn-primary w-50 " data-bs-toggle="collapse"
@@ -298,7 +317,13 @@
                       :class="{'col-12 col-md-4 mt-4': true}"
                       v-for="(provider, providerIndex) in flight.providers" :key="providerIndex">
                     <div
-                        :class="{'border p-3 rounded': true, 'flight-active': return_flight_index === index && providerIndex === return_flight_provider_index}">
+                        :class="{'border p-3 rounded': true, 'flight-active': return_flight_index === index && providerIndex === return_flight_provider_index}"
+                        :title="provider.message || ''"
+                        :style="{
+                          backgroundColor: provider.message ? '#ffebee' : 'transparent',
+                          cursor: provider.message ? 'help' : 'default'
+                        }"
+                    >
                       <div class="d-flex justify-content-between align-items-center">
                         <h5>{{ provider.provider_name }}</h5>
                         <img :src="provider.provider_logo" :alt="provider.provider_name" width="35" height="35">
@@ -321,7 +346,7 @@
                       <hr>
                       <div class="d-flex justify-content-between align-items-center mt-2">
                         <h5>هر نفر :</h5>
-                        <h5>
+                        <h5 :title="provider.message || ''" :style="{ cursor: provider.message ? 'help' : 'default' }">
                           <span>{{ Number(provider.price).toLocaleString() }}</span>
                           <span> تومان </span>
                         </h5>
@@ -329,7 +354,7 @@
                       <hr>
                       <div class="d-flex justify-content-between align-items-center mt-2">
                         <h5>قیمت کل :</h5>
-                        <h5>
+                        <h5 :title="provider.message || ''" :style="{ cursor: provider.message ? 'help' : 'default' }">
                           <span>{{ Number(provider.price * adults).toLocaleString() }}</span>
                           <span> تومان </span>
                         </h5>
@@ -468,23 +493,23 @@ export default {
         hotelstarAnalysis: this.filter.hotelstarAnalysis
       };
 
-      this.$http.post('/build-tour-analyse/', this.body_new, { timeout: 600000000 })
-        .then(res => {
-          this.analysis_data_here = res.data;
-          this.analysis_loading_here = false;
-          this.datakey++;
-        })
-        .catch((e) => {
-          if (e.response && e.response.status === 401) {
-            return this.$router.push('/login');
-          } else if (e.response && e.response.status === 504) {
-            this.analysis_data_here = { message: "The server took too long to respond. Please try again later." };
-          }
-        })
-        .finally(() => {
-          this.analysis_loading_here = false;
-        });
-    },
+    this.$http.post('/build-tour-analyse/', this.body_new, { timeout: 600000000 })
+      .then(res => {
+        this.analysis_data_here = res.data;
+        this.analysis_loading_here = false;
+        this.datakey++;
+      })
+      .catch((e) => {
+        if (e.response && e.response.status === 401) {
+          return this.$router.push('/login');
+        } else if (e.response && e.response.status === 504) {
+          this.analysis_data_here = { message: "The server took too long to respond. Please try again later." };
+        }
+      })
+      .finally(() => {
+        this.analysis_loading_here = false;
+      });
+  },
     getGoFlights() {
       try {
         if (!this.data?.flight?.go_flight) {
@@ -627,6 +652,15 @@ export default {
     parseTime(time) {
       const [hours, minutes] = time.split(':').map(Number);
       return hours * 60 + minutes;
+    },
+    getStarErrorMessage(star) {
+      if (!this.analysis_data_here || !this.analysis_data_here.hotel_star) return '';
+      
+      const starData = this.analysis_data_here.hotel_star.find(s => s.star === star);
+      if (!starData || !starData.count) {
+        return 'داده‌ای برای این ستاره موجود نیست';
+      }
+      return '';
     }
   },
   created() {
@@ -644,7 +678,7 @@ export default {
     },
     "filter.hotel": {
       handler(val) {
-        if (val.length) {
+      if (val.length) {
           this.hotels = this.static_hotels.filter(hotel => 
             val.includes(hotel.hotel_name)
           );

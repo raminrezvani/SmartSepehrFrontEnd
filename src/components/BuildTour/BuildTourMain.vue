@@ -152,19 +152,21 @@
                   </div>
                 </div>
                 
-                <div class="providers-list">
-                  <div class="provider-item" v-for="(provider, index) of providerLength" :key="index">
-                    <div class="d-flex justify-content-between align-items-center">
-                      <div class="form-check">
-                        <input type="checkbox" :id="`filter_provider_${provider.name}`" 
-                               class="form-check-input" :value="true"
+                <div class="provider-list">
+                  <div v-for="(provider, index) in providerLength" :key="index" class="provider-item">
+                    <div class="d-flex justify-content-between align-items-center p-2">
+                      <div class="d-flex align-items-center">
+                        <input type="checkbox" 
+                               :id="'provider_' + index" 
                                v-model="filter_provider[provider.name]" 
-                               @change="sortedData">
-                        <label :for="`filter_provider_${provider.name}`" class="form-check-label">
-                          {{ provider.name }}
-                        </label>
+                               :value="true">
+                        <label :for="'provider_' + index" class="ms-2">{{ provider.name }}</label>
                       </div>
-                      <span class="badge" :class="provider.count > 0 ? 'bg-success' : 'bg-danger'">
+                      <span :title="provider.message || ''" 
+                            :style="{ 
+                              cursor: provider.message ? 'help' : 'default',
+                              color: provider.message ? '#dc3545' : 'inherit'
+                            }">
                         {{ provider.count }}
                       </span>
                     </div>
@@ -947,7 +949,7 @@ export default {
   border-bottom: 1px solid #e9ecef;
 }
 
-.providers-list {
+.provider-list {
   max-height: 300px;
   overflow-y: auto;
   padding: 0.5rem;
@@ -985,26 +987,26 @@ export default {
 }
 
 /* Scrollbar Styling */
-.providers-list {
+.provider-list {
   scrollbar-width: thin;
   scrollbar-color: #888 #f1f1f1;
 }
 
-.providers-list::-webkit-scrollbar {
+.provider-list::-webkit-scrollbar {
   width: 6px;
 }
 
-.providers-list::-webkit-scrollbar-track {
+.provider-list::-webkit-scrollbar-track {
   background: #f1f1f1;
   border-radius: 3px;
 }
 
-.providers-list::-webkit-scrollbar-thumb {
+.provider-list::-webkit-scrollbar-thumb {
   background: #888;
   border-radius: 3px;
 }
 
-.providers-list::-webkit-scrollbar-thumb:hover {
+.provider-list::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
 </style>
