@@ -87,7 +87,28 @@
             <span v-else>نمایش آنالیز</span>
           </button>
 
+          <button class="btn btn-primary ms-2" v-on:click="show_costs = !show_costs">
+            <span v-if="show_costs">بستن هزینه‌ها</span>
+            <span v-else>نمایش هزینه‌ها</span>
+          </button>
 
+          <!-- هزینه ترانسفر -->
+          <div class="mt-3" v-if="show_costs">
+            <label class="form-label">هزینه ترانسفر</label>
+            <div class="input-group">
+              <input type="number" class="form-control" v-model="transfer_cost" min="0" placeholder="مبلغ ترانسفر">
+              <span class="input-group-text">تومان</span>
+            </div>
+          </div>
+
+          <!-- هزینه گشت -->
+          <div class="mt-3" v-if="show_costs">
+            <label class="form-label">هزینه گشت</label>
+            <div class="input-group">
+              <input type="number" class="form-control" v-model="tour_cost" min="0" placeholder="مبلغ گشت">
+              <span class="input-group-text">تومان</span>
+            </div>
+          </div>
 
           
           <!--          <p class="m-0">خدمات :</p>-->
@@ -226,7 +247,10 @@ export default {
         tooltip: {
           custom: this.customTooltip
         }
-      }
+      },
+      transfer_cost: 0,
+      tour_cost: 0,
+      show_costs: false,
     }
   },
   methods: {
@@ -383,16 +407,16 @@ export default {
       this.show_rooms = !this.show_rooms;
       this.show_analysis = false;
     },
-    roomPrice(price,capacity) {
+    roomPrice(price, capacity) {
+      if (!price || !capacity) return 0;
       
-      const result = (price / capacity) + this.go_flight.providers[this.go_flight_provider].price + this.return_flight.providers[this.return_flight_provider].price;
-      // console.log(result * this.adults)
+      // محاسبه قیمت پایه شامل قیمت اتاق و پروازها
+      const result = (price / capacity) + 
+        this.go_flight.providers[this.go_flight_provider].price + 
+        this.return_flight.providers[this.return_flight_provider].price;
+      
+      // محاسبه قیمت کل با ضرب در تعداد مسافران
       return Number(Math.round(result * this.adults)).toLocaleString();
-
-      // // old code
-      // const result = (price / this.adults) + this.go_flight.providers[this.go_flight_provider].price + this.return_flight.providers[this.return_flight_provider].price;
-      // // console.log(result * this.adults)
-      // return Number(Math.round(result * this.adults)).toLocaleString();
     },
     roomPersonPrice(price,capacity) {
 
