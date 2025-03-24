@@ -407,17 +407,35 @@ export default {
       this.show_rooms = !this.show_rooms;
       this.show_analysis = false;
     },
-    roomPrice(price, capacity) {
-      if (!price || !capacity) return 0;
+  roomPrice(price, capacity) {
+    if (!price || !capacity) return 0;
+
+    // تبدیل هزینه‌ها به عدد برای جلوگیری از خطا
+    const transferCost = Number(this.transfer_cost) || 0;
+    const tourCost = Number(this.tour_cost) || 0;
+
+    // محاسبه قیمت پایه شامل قیمت اتاق، پروازها، ترانسفر و گشت به‌ازای هر نفر
+    const resultPerPerson = (price / capacity) + 
+      this.go_flight.providers[this.go_flight_provider].price + 
+      this.return_flight.providers[this.return_flight_provider].price + 
+      transferCost + 
+      tourCost;
+
+    // محاسبه قیمت کل با ضرب در تعداد مسافران
+    return Number(Math.round(resultPerPerson * this.adults)).toLocaleString();
+  },
+
+    // roomPrice(price, capacity) {
+    //   if (!price || !capacity) return 0;
       
-      // محاسبه قیمت پایه شامل قیمت اتاق و پروازها
-      const result = (price / capacity) + 
-        this.go_flight.providers[this.go_flight_provider].price + 
-        this.return_flight.providers[this.return_flight_provider].price;
+    //   // محاسبه قیمت پایه شامل قیمت اتاق و پروازها
+    //   const result = (price / capacity) + 
+    //     this.go_flight.providers[this.go_flight_provider].price + 
+    //     this.return_flight.providers[this.return_flight_provider].price;
       
-      // محاسبه قیمت کل با ضرب در تعداد مسافران
-      return Number(Math.round(result * this.adults)).toLocaleString();
-    },
+    //   // محاسبه قیمت کل با ضرب در تعداد مسافران
+    //   return Number(Math.round(result * this.adults)).toLocaleString();
+    // },
     roomPersonPrice(price,capacity) {
 
       const result = (price / capacity) + this.go_flight.providers[this.go_flight_provider].price + this.return_flight.providers[this.return_flight_provider].price;
