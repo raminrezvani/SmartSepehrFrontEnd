@@ -439,69 +439,52 @@ export default {
   methods: {
     initializeData() {
       try {
-        // Initialize hotels data
         if (this.data?.hotel?.length) {
           this.static_hotels = [...this.data.hotel];
           this.hotels = [...this.data.hotel];
         } else {
-          console.warn('No hotel data available');
           this.static_hotels = [];
           this.hotels = [];
         }
         
-        // Initialize flights
         this.go_flight = this.getGoFlights();
         this.return_flight = this.getReturnFlights();
-        
-        // Initialize other data
         this.calc_last_search();
         
-        // Apply initial sorting if we have hotels
         if (this.hotels.length) {
           this.sortHotels();
         }
         
-        // Force component update
         this.datakey++;
       } catch (error) {
         console.error("Error initializing data:", error);
       }
     },
     extractAnalysis() {
-      console.log(this.filter.selected_star_analysis);
-      this.analysis_loading_here=true;
-    
-      this.body_new.adults=this.body;
+      this.analysis_loading_here = true;
       
-      this.body_new.start_date=this.body.start_date;
-      this.body_new.end_date=this.body.end_date;
-      this.body_new.night_count=this.body.night_count;
-      this.body_new.hotel_star=this.body.hotel_star;
-      this.body_new.source=this.body.source;
-      this.body_new.target=this.body.target;
-      this.body_new.adults=this.body.adults;
-      this.body_new.use_cache=this.body.use_cache;
-      this.body_new.hotel_star=this.body.hotel_star;
-      this.body_new.hotelstarAnalysis=this.filter.hotelstarAnalysis;
+      this.body_new = {
+        ...this.body,
+        hotelstarAnalysis: this.filter.hotelstarAnalysis
+      };
 
-    this.$http.post('/build-tour-analyse/', this.body_new, { timeout: 600000000 })
-      .then(res => {
-        this.analysis_data_here = res.data;
-        console.log('New Build_analysis')
-        this.analysis_loading_here = false;
-        this.datakey++;
-      })
-      .catch((e) => {
-        if (e.response && e.response.status === 401) {
-          return this.$router.push('/login');
-        } else if (e.response && e.response.status === 504) {
-          this.analysis_data_here = { message: "The server took too long to respond. Please try again later." };
-        }
-      })
-      .finally(() => {
-        this.analysis_loading_here = false;
-      });
-  },
+      this.$http.post('/build-tour-analyse/', this.body_new, { timeout: 600000000 })
+        .then(res => {
+          this.analysis_data_here = res.data;
+          this.analysis_loading_here = false;
+          this.datakey++;
+        })
+        .catch((e) => {
+          if (e.response && e.response.status === 401) {
+            return this.$router.push('/login');
+          } else if (e.response && e.response.status === 504) {
+            this.analysis_data_here = { message: "The server took too long to respond. Please try again later." };
+          }
+        })
+        .finally(() => {
+          this.analysis_loading_here = false;
+        });
+    },
     getGoFlights() {
       try {
         if (!this.data?.flight?.go_flight) {
@@ -597,137 +580,53 @@ export default {
       
       // Handle price sorting
       if (this.filter.orderBy === "price_a" || this.filter.orderBy === "price_d") {
-        // Calculate total price for each hotel
-        const hotelPrices = this.hotels.map(hotel => {
-          const goFlight = this.go_flight[this.go_flight_index];
-          const returnFlight = this.return_flight[this.return_flight_index];
-          
-          let goPrice = 0;
-          let returnPrice = 0;
-          
-          // Find go flight price for this hotel
-          if (goFlight && goFlight.providers) {
-            const hotelProvider = goFlight.providers.find(p => p.hotel_id === hotel.id);
-            if (hotelProvider) {
-              goPrice = hotelProvider.price;
-            }
-          }
-          
-          // Find return flight price for this hotel
-          if (returnFlight && returnFlight.providers) {
-            const hotelProvider = returnFlight.providers.find(p => p.hotel_id === hotel.id);
-            if (hotelProvider) {
-              returnPrice = hotelProvider.price;
-            }
-          }
-          
-          // Calculate total price including hotel price
-          const flightPrice = (goPrice + returnPrice) * this.adults;
-          const hotelPrice = hotel.min_price * this.adults;
-          const totalPrice = flightPrice + hotelPrice;
-          
-          return {
-            hotel,
-            totalPrice
-          };
+        const sortedHotels = [...this.hotelPrices].sort((a, b) => {
+          return this.filter.orderBy === "price_a" 
+            ? a.totalPrice - b.totalPrice 
+            : b.totalPrice - a.totalPrice;
         });
         
-        // Sort hotels based on total price
-        hotelPrices.sort((a, b) => {
-          if (this.filter.orderBy === "price_a") {
-            return a.totalPrice - b.totalPrice;
-          } else {
-            return b.totalPrice - a.totalPrice;
-          }
-        });
-        
-        // Update hotels array with sorted order
-        this.hotels = hotelPrices.map(item => item.hotel);
+        this.hotels = sortedHotels.map(item => item.hotel);
         return;
       }
       
       // Handle flight time sorting
+      const flightTimes = this.flightTimes;
+      
       this.hotels.forEach(hotel => {
-        // Handle go flights
+        const times = flightTimes.get(hotel.id);
+        if (!times) return;
+        
         if (this.filter.orderBy === "go_time_a" || this.filter.orderBy === "go_time_d") {
-          let selectedFlightIndex = -1;
-          let selectedProviderIndex = -1;
-          let selectedTime = this.filter.orderBy === "go_time_a" ? "23:59" : "00:00";
-          
-          // Search through all go flights
-          this.go_flight.forEach((flight, flightIndex) => {
-            flight.providers.forEach((provider, providerIndex) => {
-              if (provider.hotel_id === hotel.id) {
-                const currentTime = provider.go_time || "00:00";
-                const currentMinutes = parseInt(currentTime.split(':')[0]) * 60 + parseInt(currentTime.split(':')[1]);
-                const selectedMinutes = parseInt(selectedTime.split(':')[0]) * 60 + parseInt(selectedTime.split(':')[1]);
-                
-                if (this.filter.orderBy === "go_time_a") {
-                  // Find earliest time
-                  if (currentMinutes < selectedMinutes) {
-                    selectedTime = currentTime;
-                    selectedFlightIndex = flightIndex;
-                    selectedProviderIndex = providerIndex;
-                  }
-                } else {
-                  // Find latest time
-                  if (currentMinutes > selectedMinutes) {
-                    selectedTime = currentTime;
-                    selectedFlightIndex = flightIndex;
-                    selectedProviderIndex = providerIndex;
-                  }
-                }
-              }
-            });
+          const sortedGoTimes = [...times.goTimes].sort((a, b) => {
+            const timeA = this.parseTime(a.time);
+            const timeB = this.parseTime(b.time);
+            return this.filter.orderBy === "go_time_a" ? timeA - timeB : timeB - timeA;
           });
           
-          // Update the selected flight if found
-          if (selectedFlightIndex !== -1) {
-            this.go_flight_index = selectedFlightIndex;
-            this.go_flight_provider_index = selectedProviderIndex;
+          if (sortedGoTimes.length) {
+            this.go_flight_index = sortedGoTimes[0].flightIndex;
+            this.go_flight_provider_index = sortedGoTimes[0].providerIndex;
           }
         }
         
-        // Handle return flights
         if (this.filter.orderBy === "return_time_a" || this.filter.orderBy === "return_time_d") {
-          let selectedFlightIndex = -1;
-          let selectedProviderIndex = -1;
-          let selectedTime = this.filter.orderBy === "return_time_a" ? "23:59" : "00:00";
-          
-          // Search through all return flights
-          this.return_flight.forEach((flight, flightIndex) => {
-            flight.providers.forEach((provider, providerIndex) => {
-              if (provider.hotel_id === hotel.id) {
-                const currentTime = provider.return_time || "00:00";
-                const currentMinutes = parseInt(currentTime.split(':')[0]) * 60 + parseInt(currentTime.split(':')[1]);
-                const selectedMinutes = parseInt(selectedTime.split(':')[0]) * 60 + parseInt(selectedTime.split(':')[1]);
-                
-                if (this.filter.orderBy === "return_time_a") {
-                  // Find earliest time
-                  if (currentMinutes < selectedMinutes) {
-                    selectedTime = currentTime;
-                    selectedFlightIndex = flightIndex;
-                    selectedProviderIndex = providerIndex;
-                  }
-                } else {
-                  // Find latest time
-                  if (currentMinutes > selectedMinutes) {
-                    selectedTime = currentTime;
-                    selectedFlightIndex = flightIndex;
-                    selectedProviderIndex = providerIndex;
-                  }
-                }
-              }
-            });
+          const sortedReturnTimes = [...times.returnTimes].sort((a, b) => {
+            const timeA = this.parseTime(a.time);
+            const timeB = this.parseTime(b.time);
+            return this.filter.orderBy === "return_time_a" ? timeA - timeB : timeB - timeA;
           });
           
-          // Update the selected flight if found
-          if (selectedFlightIndex !== -1) {
-            this.return_flight_index = selectedFlightIndex;
-            this.return_flight_provider_index = selectedProviderIndex;
+          if (sortedReturnTimes.length) {
+            this.return_flight_index = sortedReturnTimes[0].flightIndex;
+            this.return_flight_provider_index = sortedReturnTimes[0].providerIndex;
           }
         }
       });
+    },
+    parseTime(time) {
+      const [hours, minutes] = time.split(':').map(Number);
+      return hours * 60 + minutes;
     }
   },
   created() {
@@ -743,27 +642,22 @@ export default {
       deep: true,
       immediate: true
     },
-    "filter.hotel": function (val) {
-      let result = []
-      if (val.length) {
-        val.forEach(s_hotel => {
-          const fil = this.static_hotels.filter(hotel => hotel.hotel_name === s_hotel);
-          if (fil) {
-            result.push(fil[0]);
-          }
-        })
-        this.hotels = result;
-      } else {
-        console.log('empty', this.static_hotels);
-        this.hotels = this.static_hotels;
+    "filter.hotel": {
+      handler(val) {
+        if (val.length) {
+          this.hotels = this.static_hotels.filter(hotel => 
+            val.includes(hotel.hotel_name)
+          );
+        } else {
+          this.hotels = [...this.static_hotels];
+        }
+        this.sortHotels();
       }
-      this.sortHotels();
     },
-    hotels: {
+    "filter.orderBy": {
       handler() {
         this.sortHotels();
-      },
-      deep: true
+      }
     }
   },
   unmounted() {
@@ -776,6 +670,71 @@ export default {
         label: `${hotel.hotel_name} (${hotel.hotel_star} ستاره)`,
         value: hotel.hotel_name
       }));
+    },
+    hotelPrices() {
+      if (!this.hotels.length) return [];
+      
+      return this.hotels.map(hotel => {
+        const goFlight = this.go_flight[this.go_flight_index];
+        const returnFlight = this.return_flight[this.return_flight_index];
+        
+        let goPrice = 0;
+        let returnPrice = 0;
+        
+        if (goFlight?.providers) {
+          const hotelProvider = goFlight.providers.find(p => p.hotel_id === hotel.id);
+          if (hotelProvider) goPrice = hotelProvider.price;
+        }
+        
+        if (returnFlight?.providers) {
+          const hotelProvider = returnFlight.providers.find(p => p.hotel_id === hotel.id);
+          if (hotelProvider) returnPrice = hotelProvider.price;
+        }
+        
+        const flightPrice = (goPrice + returnPrice) * this.adults;
+        const hotelPrice = hotel.min_price * this.adults;
+        
+        return {
+          hotel,
+          totalPrice: flightPrice + hotelPrice
+        };
+      });
+    },
+    flightTimes() {
+      const times = new Map();
+      
+      this.hotels.forEach(hotel => {
+        const goTimes = [];
+        const returnTimes = [];
+        
+        this.go_flight.forEach((flight, flightIndex) => {
+          flight.providers.forEach((provider, providerIndex) => {
+            if (provider.hotel_id === hotel.id) {
+              goTimes.push({
+                time: provider.go_time || "00:00",
+                flightIndex,
+                providerIndex
+              });
+            }
+          });
+        });
+        
+        this.return_flight.forEach((flight, flightIndex) => {
+          flight.providers.forEach((provider, providerIndex) => {
+            if (provider.hotel_id === hotel.id) {
+              returnTimes.push({
+                time: provider.return_time || "00:00",
+                flightIndex,
+                providerIndex
+              });
+            }
+          });
+        });
+        
+        times.set(hotel.id, { goTimes, returnTimes });
+      });
+      
+      return times;
     }
   }
 }
