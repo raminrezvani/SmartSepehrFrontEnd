@@ -80,12 +80,13 @@
             <calender-index
                 key="go_date"
                 placeholder="تاریخ رفت"
-                :show="show_datepicker"
+                :show="show_datepicker_go"
                 :disable-old="true"
                 :days_data="calendar_data.go"
                 @submitted="goDateSubmit"
-                @showing="datePickerShowing"
+                @showing="(val) => datePickerShowing(val, 'departure')"
                 class="date-picker"
+                data-calendar="departure"
             />
           </div>
         </div>
@@ -100,12 +101,13 @@
             <calender-index
                 key="back_date"
                 placeholder="تاریخ برگشت"
-                :show="show_datepicker"
+                :show="show_datepicker_return"
                 :disable-old="true"
                 :days_data="calendar_data.return"
                 @submitted="returnDateSubmit"
-                @showing="datePickerShowing"
+                @showing="(val) => datePickerShowing(val, 'return')"
                 class="date-picker"
+                data-calendar="return"
             />
           </div>
         </div>
@@ -224,10 +226,9 @@ export default {
   components: {CalenderIndex, BuildResult, BuildLoading},
   data() {
     return {
-      dataKey: 0, // Initialize a key for the component
+      dataKey: 0,
       show_provider: false,
       filter_provider: {
-
         Eghamat24: true,
         Expedia:true,
         Alaedin: true,
@@ -267,11 +268,6 @@ export default {
         shayan_gasht:true,
         yegane_fard:true,
         alaedin:true,
-
-
-
-
-
       },
       provider_length: {},
       filter_star: "all",
@@ -285,15 +281,14 @@ export default {
         "target": "KIH",
         "adults": 2,
         "use_cache":true
-       
       },
       calendar_data: {
         go: [],
         return: [],
       },
-      show_datepicker: false,
       show_datepicker_go: false,
       show_datepicker_return: false,
+      show_datepicker: false,
       data: {},
       analyse_data: [],
       show_analyse_loading: false,
@@ -583,13 +578,11 @@ export default {
       
     },
 
-    datePickerShowing(val) {
-      if (val) {
-        this.show_datepicker = val;
-      } else {
-        if (this.body.start_date.length > 2 && this.body.end_date.length > 2) {
-          this.show_datepicker = false;
-        }
+    datePickerShowing(val, type) {
+      if (type === 'departure') {
+        this.show_datepicker_go = val;
+      } else if (type === 'return') {
+        this.show_datepicker_return = val;
       }
     },
     getCalendarData() {
@@ -920,7 +913,220 @@ export default {
 }
 
 .date-picker {
+  position: relative;
+}
+
+/* Modal overlay */
+.date-picker-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+/* Calendar container */
+.date-picker .c-datepicker-box {
+  position: fixed;
+  top: 50%;
+  width: 900px;
+  max-width: 95%;
+  min-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 30px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}
+
+/* Individual calendar box */
+.date-picker .c-box-main {
+  flex: 1;
+  background: #fff;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Calendar title */
+.date-picker .c-box-title {
+  font-size: 1.4rem;
+  padding: 20px 0;
+  margin-bottom: 20px;
+  text-align: center;
+  border-bottom: 2px solid #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Calendar grid */
+.date-picker .c-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* Calendar buttons */
+.date-picker .c-button {
+  width: 65px;
+  height: 65px;
+  margin: 0 auto;
+  font-size: 1.2rem;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.date-picker .c-button-title {
+  width: 65px;
+  height: 65px;
+  margin: 0 auto;
+  background: #e9ecef;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Day and price text */
+.date-picker .c-day {
+  font-size: 1.3rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.date-picker .c-price {
+  font-size: 1rem;
+  font-weight: 400;
+  color: #495057;
+}
+
+.date-picker .c-button-title .c-day {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #495057;
+}
+
+/* Input field */
+.date-picker .c-input {
+  height: 50px;
+  font-size: 1.2rem;
+  padding: 12px 18px;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
   width: 100%;
+}
+
+/* Hover effects */
+.date-picker .c-button:not(.disable):not(.active):hover {
+  background: #e9ecef;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Selected day style */
+.date-picker .c-button.active {
+  background: #0d6efd;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+}
+
+.date-picker .c-button.active .c-price {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Disabled day style */
+.date-picker .c-button.disable {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Calendar header */
+.date-picker .c-box-title h5 {
+  margin: 0;
+  text-align: center;
+  flex-grow: 1;
+  color: #495057;
+  font-weight: 600;
+  font-size: 1.4rem;
+}
+
+/* Navigation buttons */
+.date-picker .c-box-title-btn {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  border-radius: 50%;
+  background: #e9ecef;
+  color: #495057;
+  border: 1px solid #dee2e6;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0 10px;
+}
+
+.date-picker .c-box-title-btn:hover {
+  background: #dee2e6;
+  transform: scale(1.05);
+}
+
+/* Week day headers */
+.date-picker .c-button-title {
+  font-weight: bold;
+  background: #f8f9fa;
+  border: none;
+}
+
+/* Ensure proper z-index stacking */
+.date-picker {
+  z-index: 1000;
+}
+
+.date-picker .c-datepicker-box {
+  z-index: 1001;
+}
+
+/* Add specific positioning for departure and return calendars */
+.date-picker[data-calendar="departure"] .c-datepicker-box {
+  transform: translate(-25%, -50%);
+  left: 25%;
+}
+
+.date-picker[data-calendar="return"] .c-datepicker-box {
+  transform: translate(-75%, -50%);
+  left: 75%;
+}
+
+/* Add z-index management for calendars */
+.date-picker[data-calendar="departure"] {
+  z-index: 1002;
+}
+
+.date-picker[data-calendar="return"] {
+  z-index: 1001;
+}
+
+/* Ensure each calendar has its own overlay */
+.date-picker-overlay {
+  z-index: 999;
 }
 
 .provider-selector {

@@ -89,6 +89,8 @@ body {
 /* *** BOX *** */
 .c-datepicker-box {
     width: 100%;
+    min-width: 450px;
+    max-width: 500px;
     padding: 10px;
     background: #fff;
     box-shadow: var(--box-shadow);
