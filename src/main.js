@@ -7,7 +7,6 @@ import vSelect from 'vue-select';
 import {router} from "@/routes";
 import VueApexCharts from "vue3-apexcharts";
 import {store} from "@/store";
-
 const app = Vue.createApp(App);
 
 const access_token = localStorage.getItem("access_token");
