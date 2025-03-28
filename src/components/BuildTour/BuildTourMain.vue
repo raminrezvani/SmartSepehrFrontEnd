@@ -1000,42 +1000,79 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
+  padding: 0;
+  backdrop-filter: blur(3px);
 }
 
 .calendar-wrapper {
   background: white;
-  border-radius: 8px;
+  border-radius: 10px;
   width: 98%;
-  max-width: 1400px;
-  height: 92vh;
+  max-width: 1100px;
+  height: 88vh;
   display: flex;
   flex-direction: column;
   position: relative;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+  animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .calendar-header {
   position: sticky;
   top: 0;
   background: white;
-  padding: 8px 12px;
+  padding: 10px 16px;
   border-bottom: 1px solid #e9ecef;
   display: flex;
   justify-content: space-between;
   align-items: center;
   z-index: 2;
-  border-radius: 8px 8px 0 0;
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(to right, #f8f9fa, #fff);
 }
 
 .calendar-title {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
+  color: #2c3e50;
+}
+
+.calendar-close {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: #f8f9fa;
+  border-radius: 50%;
+  color: #666;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.calendar-close:hover {
+  background: #e9ecef;
+  color: #333;
+  transform: rotate(90deg);
 }
 
 .calendar-container {
@@ -1046,38 +1083,44 @@ export default {
   align-items: flex-start;
   flex: 1;
   overflow: auto;
+  background: linear-gradient(to bottom, #fff, #f8f9fa);
 }
 
 .calendar-box {
   flex: 1;
-  max-width: 650px;
-  min-width: 600px;
+  max-width: 520px;
+  min-width: 480px;
   background: #fff;
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 12px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .calendar-box h5 {
   margin-bottom: 8px;
-  font-size: 1rem;
+  font-size: 0.95rem;
+  color: #2c3e50;
+  text-align: center;
+  font-weight: 600;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e9ecef;
 }
 
 /* Calendar Grid */
 .date-picker .c-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  margin-top: 8px;
+  gap: 3px;
+  margin-top: 6px;
 }
 
 /* Calendar Buttons */
 .date-picker .c-button {
-  width: 58px;
-  height: 58px;
+  width: 48px;
+  height: 48px;
   margin: 0 auto;
-  font-size: 0.95rem;
-  background: #f8f9fa;
+  font-size: 0.85rem;
+  background: #fff;
   border: 1px solid #e9ecef;
   border-radius: 6px;
   transition: all 0.2s ease;
@@ -1089,38 +1132,65 @@ export default {
   padding: 2px;
 }
 
+.date-picker .c-button:hover:not(.disable) {
+  background: #f8f9fa;
+  border-color: #dee2e6;
+  transform: translateY(-1px);
+}
+
+.date-picker .c-button.active {
+  background: #007bff;
+  color: white;
+  border-color: #0056b3;
+}
+
+.date-picker .c-button.active .c-price {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.date-picker .c-button.disable {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f8f9fa;
+}
+
 .date-picker .c-button-title {
-  width: 58px;
-  height: 58px;
+  width: 48px;
+  height: 48px;
   margin: 0 auto;
-  background: #e9ecef;
-  border: 1px solid #dee2e6;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
   border-radius: 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.85rem;
 }
 
 .date-picker .c-day {
-  font-size: 0.95rem;
-  margin-bottom: 2px;
+  font-size: 0.9rem;
+  margin-bottom: 1px;
+  font-weight: 500;
 }
 
 .date-picker .c-price {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
+  color: #666;
 }
 
 /* Responsive Design */
 @media (max-width: 1400px) {
   .calendar-box {
-    min-width: 560px;
+    min-width: 460px;
   }
   
   .date-picker .c-button,
   .date-picker .c-button-title {
-    width: 54px;
-    height: 54px;
+    width: 45px;
+    height: 45px;
   }
 }
 
@@ -1128,41 +1198,71 @@ export default {
   .calendar-container {
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 16px;
   }
   
   .calendar-box {
-    max-width: 700px;
+    max-width: 560px;
     width: 100%;
   }
   
   .date-picker .c-button,
   .date-picker .c-button-title {
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
   }
 }
 
 @media (max-width: 768px) {
+  .calendar-wrapper {
+    height: 92vh;
+    width: 100%;
+  }
+
   .calendar-box {
     min-width: auto;
-    padding: 8px;
+    padding: 10px;
   }
   
   .date-picker .c-button,
   .date-picker .c-button-title {
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
+    font-size: 0.8rem;
   }
   
   .date-picker .c-day {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     margin-bottom: 1px;
   }
   
   .date-picker .c-price {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
   }
+
+  .calendar-container {
+    padding: 8px;
+    gap: 10px;
+  }
+}
+
+/* Scrollbar Styling */
+.calendar-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.calendar-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.calendar-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+.calendar-container::-webkit-scrollbar-thumb:hover {
+  background: #bbb;
 }
 
 .provider-selector {
