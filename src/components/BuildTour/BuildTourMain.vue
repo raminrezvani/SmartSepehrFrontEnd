@@ -756,16 +756,23 @@ export default {
         this.body.night_count = 0;
         return false;
       }
-      let date_1 = new Date(this.body.start_date);
-      let date_2 = new Date(this.body.end_date);
-      let difference = date_1.getTime() - date_2.getTime();
-      let total_days = Math.ceil(difference / (1000 * 3600 * 24));
+      
+      // Convert dates to moment objects for better date handling
+      let startDate = moment(this.body.start_date);
+      let endDate = moment(this.body.end_date);
+      
+      // Calculate the difference in days
+      let total_days = endDate.diff(startDate, 'days');
+      
+      // If the difference is negative, make it positive
       if (total_days < 0) {
-        this.body.night_count = Math.abs(total_days);
-      } else {
-        this.body.night_count = total_days * -1;
+        total_days = Math.abs(total_days);
       }
-      return true
+      
+      // Set the night count (number of days)
+      this.body.night_count = total_days;
+      
+      return true;
     },
     goDateSubmit(value) {
       const date = value.georgian;
