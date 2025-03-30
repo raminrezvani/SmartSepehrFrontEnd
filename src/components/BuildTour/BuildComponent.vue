@@ -227,7 +227,7 @@ export default {
       chartOptions: {
         chart: {
           height: 550,
-          type: 'area',
+          type: 'bar',
           toolbar: {
             show: false,
             autoSelected: 'selection'
@@ -241,7 +241,7 @@ export default {
         },
         colors: ['#006600'],
         xaxis: {
-          type: 'date',
+          type: 'category',
           categories: []
         },
         tooltip: {
@@ -401,7 +401,15 @@ export default {
       
       this.dataKey++;
 
-      this.setAnalysis();
+      // Emit event with hotel name when showing analysis
+      if (this.show_analysis) {
+        this.$emit('show-analysis', this.hotel.hotel_name);
+      }
+
+      // Call setAnalysis after a short delay to ensure data is available
+      setTimeout(() => {
+        this.setAnalysis();
+      }, 100);
     },
     showRooms() {
       this.show_rooms = !this.show_rooms;
@@ -491,44 +499,74 @@ export default {
       return sources[this.source]
     },
     setAnalysis() {
-      //
-
-      console.log(this.analysis_data)
-
+      console.log("Analysis Data:", this.analysis_data);
 
       let filtered_data = {};
       for (let hotel of Object.keys(this.analysis_data)) {
         filtered_data[hotel] = this.analysis_data[hotel].filter(h => h.hotel_name === this.hotel.hotel_name);
       }
-      //
+
       this.series = [{
         name: "نام هتل",
         data: []
       }];
       this.chartOptions.xaxis.categories = [];
+      
       for (let hotel of Object.keys(filtered_data)) {
         let hotel_date = moment_jalali(hotel).format("jYYYY/jMM/jDD");
         this.chartOptions.xaxis.categories.push(hotel_date);
+        
         try {
-          this.series[0].data.push({
-            price: filtered_data[hotel][0].price,
-            hotel_name: filtered_data[hotel][0]['hotel_name'],
-            room_name: filtered_data[hotel][0]['room_name'],
-            provider: filtered_data[hotel][0]['provider'],
-            y: filtered_data[hotel][0].price,
-            x: hotel_date
-          })
-        } catch {
+          // Get all rooms for this hotel on this date
+          const rooms = filtered_data[hotel][0].rooms || [];
+          if (rooms.length > 0) {
+            // Find the room with minimum price
+            const minPriceRoom = rooms.reduce((min, room) => 
+              room.price < min.price ? room : min
+            );
+            
+            this.series[0].data.push({
+              price: minPriceRoom.price,
+              hotel_name: filtered_data[hotel][0].hotel_name,
+              room_name: minPriceRoom.name,
+              provider: minPriceRoom.provider,
+              y: minPriceRoom.price,
+              x: hotel_date
+            });
+          } else {
+            this.series[0].data.push({
+              price: 0,
+              hotel_name: this.hotel.hotel_name,
+              room_name: '',
+              provider: '',
+              y: 0,
+              x: hotel_date
+            });
+          }
+        } catch (error) {
+          console.error("Error processing hotel data:", error);
           this.series[0].data.push({
             price: 0,
-            hotel_name: '',
+            hotel_name: this.hotel.hotel_name,
             room_name: '',
             provider: '',
             y: 0,
             x: hotel_date
-          })
+          });
         }
       }
+
+      // Force chart update
+      this.$nextTick(() => {
+        if (this.chart) {
+          this.chart.updateOptions({
+            xaxis: {
+              categories: this.chartOptions.xaxis.categories
+            }
+          });
+          this.chart.updateSeries(this.series);
+        }
+      });
     }
   },
   created() {

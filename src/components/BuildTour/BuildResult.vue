@@ -102,7 +102,8 @@
                            :go_flight="go_flight[go_flight_index]"
                            :go_flight_provider="go_flight_provider_index"
                            :return_flight="return_flight[return_flight_index]"
-                           :return_flight_provider="return_flight_provider_index"></build-component>
+                           :return_flight_provider="return_flight_provider_index"
+                           @show-analysis="handleShowAnalysis(tour.hotel_name)"></build-component>
         </main>
       </div>
     </div>
@@ -431,7 +432,7 @@ export default {
         "source": this.source,
         "target": this.target,
         "adults": this.adults,
-        "use_cache": true,
+        "use_cache": false,
         "hotelstarAnalysis": []
       },
       analysis_loading_here: false,
@@ -599,6 +600,9 @@ export default {
     },
     closeAnalysis(val) {
       return this.show_analysis = val;
+    },
+    handleShowAnalysis(hotelName) {
+      this.$emit('show-analysis', hotelName);
     },
     sortHotels() {
       if (!this.hotels.length) return;

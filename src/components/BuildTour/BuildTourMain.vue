@@ -198,7 +198,8 @@
                    :body="this.body" 
                    :source="body.source" 
                    :analysis_data="analyse_data" 
-                   :analysis_loading="show_analyse_loading">
+                   :analysis_loading="show_analyse_loading"
+                   @show-analysis="handleShowAnalysis">
       </build-result>
     </section>
    
@@ -650,17 +651,7 @@ export default {
     convertDate(date) {
       return moment_jalali(date).format("jYYYY/jMM/jDD");
     },
-    getData(use_cache = true) {
-      // const gsm_valid_days = [1, 2, 4, 5];
-      // if (this.body.target === "GSM" && !gsm_valid_days.includes(moment(this.body.start_date).day())) {
-      //   toast.error("لطفا تاریخ معتبر وارد کنید", {
-      //     autoClose: 6000,
-      //     position: "bottom-left",
-      //     rtl: false,
-      //     closeOnClick: true
-      //   });
-      //   return false;
-      // }
+    getData(use_cache = true, hotel_name = null) {
       if (!this.body.start_date || !this.body.end_date) {
         toast.error("لطفا تاریخ هارا وارد کنید", {
           autoClose: 6000,
@@ -690,6 +681,14 @@ export default {
       }
       this.body.night_count = parseInt(this.body.night_count);
       this.body.use_cache = use_cache;
+      
+      // Add hotelstarAnalysis parameter if hotel_name is provided
+      if (hotel_name) {
+        this.body.hotelstarAnalysis = [hotel_name];
+      } else {
+        this.body.hotelstarAnalysis = null;
+      }
+      
       this.$store.state.disable_header_link = true;
       this.loading = true;
       this.show_result = false;
@@ -701,24 +700,16 @@ export default {
         this.data = res.data;
         this.provider_length = res.data.providers;
         this.filter_name = "";
-        // this.fixed_data = this.data;
-        // Make a deep copy of `res.data` to keep `fixed_data` constant
         this.fixed_data = JSON.parse(JSON.stringify(res.data));
 
         this.show_result = true;
-        // this.hotels_name = this.data.sort((a, b) => a.hotel_star - b.hotel_star).map(hotel => hotel.hotel_name);
         this.sortedData();
-        // this.getAnalysisData();
-
-
-        this.getAnalyseData(use_cache);
         this.datakey++;
       }).catch((e) => {
         if (e.response.status === 401) {
           return router.push('/login');
         }
         else if (e.response.status === 504) {
-          // Handle Gateway Timeout error
           console.log("Error 504: Gateway Timeout. The server took too long to respond.");
           this.data = { message: "The server took too long to respond. Please try again later." }; 
         }
@@ -728,28 +719,33 @@ export default {
         this.show_result = true;
       })
     },
-    getAnalyseData(use_cache) {
+    getAnalyseData(use_cache = true) {
       this.body.night_count = parseInt(this.body.night_count);
-      this.show_analyse_loading = false;
+      this.show_analyse_loading = true;
       this.$store.state.disable_header_link = true;
       this.body.range = 7;
       this.body.use_cache = use_cache;
-      console.log("this.body == "+this.body);
+      console.log("Request Body:", this.body);
       this.dataKey++;
-      // this.$http.post('/build-tour-analyse/', this.body, { timeout: 600000000 }).then(res => {
-      //   this.analyse_data = res.data;
-      // }).catch((e) => {
-      //   if (e.response.status === 401) {
-      //     return router.push('/login');
-      //   }
-      //   else if (e.response.status === 504) {
-      //     // Handle Gateway Timeout error
-      //     this.analyse_data = { message: "The server took too long to respond. Please try again later." };
-      //   }
-      // }).finally(() => {
-      // this.$store.state.disable_header_link = false;
-      //   this.show_analyse_loading = false;
-      // })
+
+      this.$http.post('/build-tour-analyse/', this.body).then(res => {
+        console.log("Analysis Response:", res.data);
+        this.analyse_data = res.data;
+        // Force update of the analysis data
+        this.$nextTick(() => {
+          this.dataKey++;
+        });
+      }).catch((e) => {
+        if (e.response.status === 401) {
+          return router.push('/login');
+        }
+        else if (e.response.status === 504) {
+          this.analyse_data = { message: "The server took too long to respond. Please try again later." };
+        }
+      }).finally(() => {
+        this.$store.state.disable_header_link = false;
+        this.show_analyse_loading = false;
+      })
     },
     calcNighCount() {
       if (!this.body.start_date || !this.body.end_date) {
@@ -821,6 +817,12 @@ export default {
         this.show_datepicker_return = true;
         this.show_datepicker_go = true;
       }
+    },
+    handleShowAnalysis(hotelName) {
+      // Set the hotelstarAnalysis parameter with the hotel name
+      this.body.hotelstarAnalysis = [hotelName];
+      // Call getAnalyseData to fetch the analysis data
+      this.getAnalyseData(true);
     },
   },
   computed: {
@@ -1232,7 +1234,7 @@ export default {
   }
   
   .date-picker .c-button,
-  .date-picker .c-button-title {
+.date-picker .c-button-title {
     width: 38px;
     height: 38px;
     font-size: 0.8rem;
