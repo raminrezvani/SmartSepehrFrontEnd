@@ -87,28 +87,7 @@
             <span v-else>نمایش آنالیز</span>
           </button>
 
-          <button class="btn btn-primary ms-2" v-on:click="show_costs = !show_costs">
-            <span v-if="show_costs">بستن هزینه‌ها</span>
-            <span v-else>نمایش هزینه‌ها</span>
-          </button>
 
-          <!-- هزینه ترانسفر -->
-          <div class="mt-3" v-if="show_costs">
-            <label class="form-label">هزینه ترانسفر</label>
-            <div class="input-group">
-              <input type="number" class="form-control" v-model="transfer_cost" min="0" placeholder="مبلغ ترانسفر">
-              <span class="input-group-text">تومان</span>
-            </div>
-          </div>
-
-          <!-- هزینه گشت -->
-          <div class="mt-3" v-if="show_costs">
-            <label class="form-label">هزینه گشت</label>
-            <div class="input-group">
-              <input type="number" class="form-control" v-model="tour_cost" min="0" placeholder="مبلغ گشت">
-              <span class="input-group-text">تومان</span>
-            </div>
-          </div>
 
           
           <!--          <p class="m-0">خدمات :</p>-->
@@ -177,32 +156,22 @@
       </div>
     </div>
     <!-- --- CHART --- -->
-    <div class="p-3" >
-      <!-- Dropdown above the chart -->
-      <div class="mb-3">
-        <select v-model="selectedOption" @change="onSelectChange" class="form-select">
-          <option value="all">همه</option>
-          <option value="oneCapacity">یک نفر</option>
-          <option value="twoCapacity">دو نفر</option>
-          <option value="threeCapacity">سه نفر</option>
-          <option value="fourCapacity">چهار نفر</option>
-        </select>
-      </div>
 
-      <div v-if="analysis_loading" class="text-center">
-        <i class="fa fa-spinner fa-spin fa-2x"></i>
-      </div>
+    <div class="p-3" v-if="show_analysis">
 
-      <div v-else>
-        <apexchart
-          ref="chart"
-          type="bar"
-          height="550"
-          :options="chartOptions"
-          :series="series"
-          :key="dataKey"
-        ></apexchart>
-      </div>
+    <!-- Dropdown above the chart -->
+    <div class="mb-3">
+      <select v-model="selectedOption" @change="onSelectChange" class="form-select">
+        <option value="all">همه</option>
+        <option value="oneCapacity">یک نفر</option>
+        <option value="twoCapacity">دو نفر</option>
+        <option value="threeCapacity">سه نفر</option>
+        <option value="fourCapacity">چهار نفر</option>
+      </select>
+    </div>
+
+
+      <apexchart type="bar" height="550" :options="chartOptions" :series="series"></apexchart>
     </div>
   </section>
 </template>
@@ -230,7 +199,6 @@ export default {
       selectedOption:'',
       dataKey: 0, // Initialize a key for the component
       show_rooms: false,
-      show_chart:false,
       room_index: 0,
       sorted_rooms: [],
       show_analysis: false,
@@ -238,7 +206,7 @@ export default {
       chartOptions: {
         chart: {
           height: 550,
-          type: 'bar',
+          type: 'area',
           toolbar: {
             show: false,
             autoSelected: 'selection'
@@ -252,16 +220,13 @@ export default {
         },
         colors: ['#006600'],
         xaxis: {
-          type: 'category',
+          type: 'date',
           categories: []
         },
         tooltip: {
           custom: this.customTooltip
         }
-      },
-      transfer_cost: 0,
-      tour_cost: 0,
-      show_costs: false,
+      }
     }
   },
   methods: {
@@ -288,119 +253,109 @@ export default {
       
     },
     
-    callFuntion(roomType) {
-      console.log("Analysis Data:", this.analysis_data);
-      
-      if (!this.analysis_data || Object.keys(this.analysis_data).length === 0) {
-        console.log("No analysis data available");
-        return;
-      }
+    callFuntion(roomType){
 
+
+      console.log(this.analysis_data)
+      //
+      let filtered_data = {};
+      for (let hotel of Object.keys(this.analysis_data)) {
+        filtered_data[hotel] = this.analysis_data[hotel]['hotel'].filter(h => h.hotel_name === this.hotel.hotel_name);
+      }
+      //
+      // console.log(filtered_data)
       this.series = [{
-        name: this.hotel.hotel_name,
+        name: "نام هتل",
         data: []
       }];
       this.chartOptions.xaxis.categories = [];
-      
-      for (let date of Object.keys(this.analysis_data)) {
-        let hotel_date = moment_jalali(date).format("jYYYY/jMM/jDD");
+      for (let hotel of Object.keys(filtered_data)) {
+        let hotel_date = moment_jalali(hotel).format("jYYYY/jMM/jDD");
         this.chartOptions.xaxis.categories.push(hotel_date);
         
+
+        // console.log(roomType)
+        // check best room
         try {
-          const dateData = this.analysis_data[date];
-          if (dateData && dateData.hotel && Array.isArray(dateData.hotel)) {
-            const hotelData = dateData.hotel.find(h => h.hotel_name === this.hotel.hotel_name);
+          let matchingRooms = [];
+          for (let room of filtered_data[hotel][0].rooms){
+            if (
+              (roomType=='1' && room.capacity==1) || 
+              (roomType=='2' && room.capacity==2) ||
+              (roomType=='3' && room.capacity==3) ||
+              (roomType=='4' && room.capacity==4) ||
+              roomType=='all'
+              )
+
+              matchingRooms.push(room);
             
-            if (hotelData && hotelData.rooms) {
-              let matchingRooms = hotelData.rooms.filter(room => {
-                if (roomType === 'all') return true;
-                return room.capacity === parseInt(roomType);
-              });
 
-              if (matchingRooms.length > 0) {
-                let minRoom = matchingRooms.reduce((prev, curr) => (prev.price < curr.price ? prev : curr));
-                
-                this.series[0].data.push({
-                  price: minRoom.price,
-                  hotel_name: hotelData.hotel_name,
-                  room_name: minRoom.name,
-                  provider: minRoom.provider,
-                  y: minRoom.price,
-                  x: hotel_date
-                });
-              } else {
-                // اگر اتاقی با ظرفیت مورد نظر پیدا نشد، از ارزان‌ترین اتاق موجود استفاده می‌کنیم
-                let allRooms = hotelData.rooms;
-                if (allRooms.length > 0) {
-                  let cheapestRoom = allRooms.reduce((prev, curr) => (prev.price < curr.price ? prev : curr));
-                  this.series[0].data.push({
-                    price: cheapestRoom.price,
-                    hotel_name: hotelData.hotel_name,
-                    room_name: cheapestRoom.name,
-                    provider: cheapestRoom.provider,
-                    y: cheapestRoom.price,
-                    x: hotel_date
-                  });
-                } else {
-                  this.series[0].data.push({
-                    price: 0,
-                    hotel_name: this.hotel.hotel_name,
-                    room_name: '',
-                    provider: '',
-                    y: 0,
-                    x: hotel_date
-                  });
-                }
-              }
-            } else {
-              this.series[0].data.push({
-                price: 0,
-                hotel_name: this.hotel.hotel_name,
-                room_name: '',
-                provider: '',
-                y: 0,
-                x: hotel_date
-              });
-            }
-          } else {
-            console.log("Invalid date data structure:", dateData);
-            this.series[0].data.push({
-              price: 0,
-              hotel_name: this.hotel.hotel_name,
-              room_name: '',
-              provider: '',
-              y: 0,
-              x: hotel_date
-            });
           }
-        } catch (error) {
-          console.error("Error processing date data:", error);
-          this.series[0].data.push({
-            price: 0,
-            hotel_name: this.hotel.hotel_name,
-            room_name: '',
-            provider: '',
-            y: 0,
-            x: hotel_date
-          });
-        }
+        // console.log(matchingRooms)
+        // Find room with minimum price
+        if (matchingRooms.length > 0) {
+          let minRoom = matchingRooms.reduce((prev, curr) => (prev.price < curr.price ? prev : curr));
+          // console.log(minRoom)
+          
+        
+        // Push the room with minimum price into series
+        this.series[0].data.push({
+          price: minRoom.price, // Minimum price
+          hotel_name: filtered_data[hotel][0]['hotel_name'], // Hotel name
+          room_name: minRoom.name, // Room name of the minimum price
+          provider: minRoom.provider, // Provider of the room with minimum price
+          y: minRoom.price, // Value for the chart
+          x: hotel_date, // Date
+        });
       }
+      } catch (error) {
+        console.error("Error processing rooms:", error);
+        this.series[0].data.push({
+          price: 0,
+          hotel_name: '',
+          room_name: '',
+          provider: '',
+          y: 0,
+          x: hotel_date,
+        });
+      }
+    }
 
-      console.log("Final series data:", this.series);
+        //   // old 
+        //   if (
+        //     (roomType=='1' && ((filtered_data[hotel][0].room_name.includes('یک تخت') ||filtered_data[hotel][0].room_name.includes('یکتخت') || filtered_data[hotel][0].room_name.includes('یک نفر') || filtered_data[hotel][0].room_name.includes('یکنفر') ))) ||
+        //     (roomType=='2' && ((filtered_data[hotel][0].room_name.includes('دو تخت') ||filtered_data[hotel][0].room_name.includes('دوتخت') || filtered_data[hotel][0].room_name.includes('دو نفر') || filtered_data[hotel][0].room_name.includes('دونفر') ))) ||
+        //     (roomType=='3' && ((filtered_data[hotel][0].room_name.includes('سه تخت') ||filtered_data[hotel][0].room_name.includes('سهتخت') || filtered_data[hotel][0].room_name.includes('سه نفر') || filtered_data[hotel][0].room_name.includes('سهنفر') )))||
+        //     (roomType=='4' && ((filtered_data[hotel][0].room_name.includes('چهار تخت') ||filtered_data[hotel][0].room_name.includes('چهارتخت') || filtered_data[hotel][0].room_name.includes('چهار نفر') || filtered_data[hotel][0].room_name.includes('چهارنفر') )))||
+        //     roomType=='all')
 
-      // Force chart update
-      this.$nextTick(() => {
-        if (this.$refs.chart) {
-          this.$refs.chart.updateOptions({
-            xaxis: {
-              categories: this.chartOptions.xaxis.categories
-            }
-          });
-          this.$refs.chart.updateSeries(this.series);
-        }
-      });
-      
-      this.dataKey++;
+        //   {
+        //   this.series[0].data.push({
+        //     price: filtered_data[hotel][0].price,
+        //     hotel_name: filtered_data[hotel][0]['hotel_name'],
+        //     room_name: filtered_data[hotel][0]['room_name'],
+        //     provider: filtered_data[hotel][0]['provider'],
+        //     y: filtered_data[hotel][0].price,
+        //     x: hotel_date
+        //   });
+        // }
+        // } catch {
+        //   this.series[0].data.push({
+        //     price: 0,
+        //     hotel_name: '',
+        //     room_name: '',
+        //     provider: '',
+        //     y: 0,
+        //     x: hotel_date
+        //   })
+        // }
+        
+      // }
+    // Update the chart after modifying the series
+    this.chart.updateSeries(this.series);
+    this.dataKey++;
+
+      console.log("Option 1 create")
     },
   
   
@@ -420,63 +375,25 @@ export default {
       this.show_rooms = false;
       this.show_analysis = !this.show_analysis;
       
-      if (this.show_analysis) {
-        console.log("Emitting show-analysis event with hotel name:", this.hotel.hotel_name);
-        this.$emit('show-analysis', this.hotel.hotel_name);
-        this.selectedOption = 'all';
-        
-        // Initialize empty chart
-        this.series = [{
-          name: "نام هتل",
-          data: []
-        }];
-        this.chartOptions.xaxis.categories = [];
-        
-        // If we already have analysis data, update the chart
-        if (this.analysis_data && Object.keys(this.analysis_data).length > 0) {
-          console.log("Updating chart with existing analysis data:", this.analysis_data);
-          this.$nextTick(() => {
-            this.setAnalysis();
-            this.callFuntion('all');
-          });
-        }
-      }
-      
       this.dataKey++;
+
+      this.setAnalysis();
     },
     showRooms() {
       this.show_rooms = !this.show_rooms;
       this.show_analysis = false;
     },
-  roomPrice(price, capacity) {
-    if (!price || !capacity) return 0;
-
-    // تبدیل هزینه‌ها به عدد برای جلوگیری از خطا
-    const transferCost = Number(this.transfer_cost) || 0;
-    const tourCost = Number(this.tour_cost) || 0;
-
-    // محاسبه قیمت پایه شامل قیمت اتاق، پروازها، ترانسفر و گشت به‌ازای هر نفر
-    const resultPerPerson = (price / capacity) + 
-      this.go_flight.providers[this.go_flight_provider].price + 
-      this.return_flight.providers[this.return_flight_provider].price + 
-      transferCost + 
-      tourCost;
-
-    // محاسبه قیمت کل با ضرب در تعداد مسافران
-    return Number(Math.round(resultPerPerson * this.adults)).toLocaleString();
-  },
-
-    // roomPrice(price, capacity) {
-    //   if (!price || !capacity) return 0;
+    roomPrice(price,capacity) {
       
-    //   // محاسبه قیمت پایه شامل قیمت اتاق و پروازها
-    //   const result = (price / capacity) + 
-    //     this.go_flight.providers[this.go_flight_provider].price + 
-    //     this.return_flight.providers[this.return_flight_provider].price;
-      
-    //   // محاسبه قیمت کل با ضرب در تعداد مسافران
-    //   return Number(Math.round(result * this.adults)).toLocaleString();
-    // },
+      const result = (price / capacity) + this.go_flight.providers[this.go_flight_provider].price + this.return_flight.providers[this.return_flight_provider].price;
+      // console.log(result * this.adults)
+      return Number(Math.round(result * this.adults)).toLocaleString();
+
+      // // old code
+      // const result = (price / this.adults) + this.go_flight.providers[this.go_flight_provider].price + this.return_flight.providers[this.return_flight_provider].price;
+      // // console.log(result * this.adults)
+      // return Number(Math.round(result * this.adults)).toLocaleString();
+    },
     roomPersonPrice(price,capacity) {
 
       const result = (price / capacity) + this.go_flight.providers[this.go_flight_provider].price + this.return_flight.providers[this.return_flight_provider].price;
@@ -532,52 +449,34 @@ export default {
       return sources[this.source]
     },
     setAnalysis() {
-      console.log("Setting analysis with data:", this.analysis_data);
+      //
 
-      if (!this.analysis_data || Object.keys(this.analysis_data).length === 0) {
-        console.log("No analysis data available");
-        return;
-      }
+      console.log(this.analysis_data)
+
 
       let filtered_data = {};
       for (let hotel of Object.keys(this.analysis_data)) {
         filtered_data[hotel] = this.analysis_data[hotel].filter(h => h.hotel_name === this.hotel.hotel_name);
       }
-
-      console.log("Filtered data:", filtered_data);
-
+      //
       this.series = [{
         name: "نام هتل",
         data: []
       }];
       this.chartOptions.xaxis.categories = [];
-      
       for (let hotel of Object.keys(filtered_data)) {
         let hotel_date = moment_jalali(hotel).format("jYYYY/jMM/jDD");
         this.chartOptions.xaxis.categories.push(hotel_date);
-        
         try {
-          if (filtered_data[hotel] && filtered_data[hotel].length > 0) {
-            this.series[0].data.push({
-              price: filtered_data[hotel][0].price,
-              hotel_name: filtered_data[hotel][0].hotel_name,
-              room_name: filtered_data[hotel][0].room_name,
-              provider: filtered_data[hotel][0].provider,
-              y: filtered_data[hotel][0].price,
-              x: hotel_date
-            });
-          } else {
-            this.series[0].data.push({
-              price: 0,
-              hotel_name: this.hotel.hotel_name,
-              room_name: '',
-              provider: '',
-              y: 0,
-              x: hotel_date
-            });
-          }
-        } catch (error) {
-          console.error("Error processing hotel data:", error);
+          this.series[0].data.push({
+            price: filtered_data[hotel][0].price,
+            hotel_name: filtered_data[hotel][0]['hotel_name'],
+            room_name: filtered_data[hotel][0]['room_name'],
+            provider: filtered_data[hotel][0]['provider'],
+            y: filtered_data[hotel][0].price,
+            x: hotel_date
+          })
+        } catch {
           this.series[0].data.push({
             price: 0,
             hotel_name: '',
@@ -585,39 +484,9 @@ export default {
             provider: '',
             y: 0,
             x: hotel_date
-          });
+          })
         }
       }
-
-      console.log("Final series data:", this.series);
-
-      // Force chart update
-      this.$nextTick(() => {
-        if (this.$refs.chart) {
-          this.$refs.chart.updateOptions({
-            xaxis: {
-              categories: this.chartOptions.xaxis.categories
-            }
-          });
-          this.$refs.chart.updateSeries(this.series);
-        }
-      });
-    }
-  },
-  watch: {
-    analysis_data: {
-      handler(newData) {
-        console.log("Watch - Analysis Data in BuildComponent:", newData);
-        if (this.show_analysis && newData && Object.keys(newData).length > 0) {
-          console.log("Watch triggered - Updating chart");
-          this.$nextTick(() => {
-            this.setAnalysis();
-            this.callFuntion('all');
-          });
-        }
-      },
-      deep: true,
-      immediate: true
     }
   },
   created() {

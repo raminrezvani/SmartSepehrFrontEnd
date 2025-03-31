@@ -436,7 +436,7 @@ export default {
         "hotelstarAnalysis": []
       },
       analysis_loading_here: false,
-      analysis_data_here: [],
+      analysis_data_here: {},
       go_flight_index: 0,
       go_flight_provider_index: 0,
       show_more_go_flight_index: -1,
@@ -494,23 +494,29 @@ export default {
         hotelstarAnalysis: this.filter.hotelstarAnalysis
       };
 
-    this.$http.post('/build-tour-analyse/', this.body_new, { timeout: 600000000 })
-      .then(res => {
-        this.analysis_data_here = res.data;
-        this.analysis_loading_here = false;
-        this.datakey++;
-      })
-      .catch((e) => {
-        if (e.response && e.response.status === 401) {
-          return this.$router.push('/login');
-        } else if (e.response && e.response.status === 504) {
-          this.analysis_data_here = { message: "The server took too long to respond. Please try again later." };
-        }
-      })
-      .finally(() => {
-        this.analysis_loading_here = false;
-      });
-  },
+      console.log("Sending request with body:", this.body_new);
+
+      this.$http.post('/build-tour-analyse/', this.body_new, { timeout: 600000000 })
+        .then(res => {
+          console.log("Received analysis data:", res.data);
+          this.analysis_data_here = res.data;
+          // Emit event to notify parent component
+          this.$emit('update:analysis_data', res.data);
+          this.analysis_loading_here = false;
+          this.datakey++;
+        })
+        .catch((e) => {
+          console.error("Error in analysis request:", e);
+          if (e.response && e.response.status === 401) {
+            return this.$router.push('/login');
+          } else if (e.response && e.response.status === 504) {
+            this.analysis_data_here = { message: "The server took too long to respond. Please try again later." };
+          }
+        })
+        .finally(() => {
+          this.analysis_loading_here = false;
+        });
+    },
     getGoFlights() {
       try {
         if (!this.data?.flight?.go_flight) {
@@ -676,6 +682,14 @@ export default {
         if (newData && Object.keys(newData).length > 0) {
           this.initializeData();
         }
+      },
+      deep: true,
+      immediate: true
+    },
+    analysis_data: {
+      handler(newData) {
+        console.log("Analysis Data in BuildResult:", newData);
+        this.analysis_data_here = newData;
       },
       deep: true,
       immediate: true
