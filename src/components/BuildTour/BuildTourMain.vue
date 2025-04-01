@@ -730,22 +730,47 @@ export default {
 
       this.$http.post('/build-tour-analyse/', this.body).then(res => {
         console.log("Analysis Response:", res.data);
-        this.analyse_data = res.data;
+        
+        // Initialize analyse_data if it doesn't exist
+        if (!this.analyse_data) {
+          this.analyse_data = {};
+        }
+
+        // For each date in the new data
+        Object.keys(res.data).forEach(date => {
+          if (!this.analyse_data[date]) {
+            // If date doesn't exist in current data, add it
+            this.analyse_data[date] = res.data[date];
+          } else {
+            // If date exists, merge hotel data
+            if (res.data[date].hotel && Array.isArray(res.data[date].hotel)) {
+              res.data[date].hotel.forEach(newHotel => {
+                const existingHotelIndex = this.analyse_data[date].hotel.findIndex(
+                  h => h.hotel_name === newHotel.hotel_name
+                );
+                if (existingHotelIndex === -1) {
+                  // If hotel doesn't exist for this date, add it
+                  this.analyse_data[date].hotel.push(newHotel);
+                } else {
+                  // If hotel exists, update its data
+                  this.analyse_data[date].hotel[existingHotelIndex] = newHotel;
+                }
+              });
+            }
+          }
+        });
+
         // Force update of the analysis data
         this.$nextTick(() => {
           this.dataKey++;
         });
-      }).catch((e) => {
-        if (e.response.status === 401) {
-          return router.push('/login');
-        }
-        else if (e.response.status === 504) {
-          this.analyse_data = { message: "The server took too long to respond. Please try again later." };
-        }
+      }).catch(error => {
+        console.error("Error fetching analysis data:", error);
+        this.show_analyse_loading = false;
       }).finally(() => {
         this.$store.state.disable_header_link = false;
         this.show_analyse_loading = false;
-      })
+      });
     },
     calcNighCount() {
       if (!this.body.start_date || !this.body.end_date) {

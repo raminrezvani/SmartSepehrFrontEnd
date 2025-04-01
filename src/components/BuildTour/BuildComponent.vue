@@ -296,14 +296,16 @@ export default {
         return;
       }
 
+      // Initialize series with current hotel
       this.series = [{
         name: this.hotel.hotel_name,
         data: []
       }];
       this.chartOptions.xaxis.categories = [];
       
-      for (let date of Object.keys(this.analysis_data)) {
-        let hotel_date = moment_jalali(date).format("jYYYY/jMM/jDD");
+      // Process each date in analysis_data
+      Object.keys(this.analysis_data).forEach(date => {
+        const hotel_date = moment_jalali(date).format("jYYYY/jMM/jDD");
         this.chartOptions.xaxis.categories.push(hotel_date);
         
         try {
@@ -329,7 +331,7 @@ export default {
                   x: hotel_date
                 });
               } else {
-                // اگر اتاقی با ظرفیت مورد نظر پیدا نشد، از ارزان‌ترین اتاق موجود استفاده می‌کنیم
+                // If no matching rooms found, use the cheapest room available
                 let allRooms = hotelData.rooms;
                 if (allRooms.length > 0) {
                   let cheapestRoom = allRooms.reduce((prev, curr) => (prev.price < curr.price ? prev : curr));
@@ -384,7 +386,11 @@ export default {
             x: hotel_date
           });
         }
-      }
+      });
+
+      // Sort data points by date using moment_jalali
+      this.series[0].data.sort((a, b) => moment_jalali(a.x, "jYYYY/jMM/jDD").valueOf() - moment_jalali(b.x, "jYYYY/jMM/jDD").valueOf());
+      this.chartOptions.xaxis.categories.sort((a, b) => moment_jalali(a, "jYYYY/jMM/jDD").valueOf() - moment_jalali(b, "jYYYY/jMM/jDD").valueOf());
 
       console.log("Final series data:", this.series);
 
@@ -539,55 +545,98 @@ export default {
         return;
       }
 
-      let filtered_data = {};
-      for (let hotel of Object.keys(this.analysis_data)) {
-        filtered_data[hotel] = this.analysis_data[hotel].filter(h => h.hotel_name === this.hotel.hotel_name);
-      }
+      // Get all unique hotel names from analysis data
+      const allHotels = new Set();
+      Object.values(this.analysis_data).forEach(dateData => {
+        if (dateData.hotel && Array.isArray(dateData.hotel)) {
+          dateData.hotel.forEach(hotel => {
+            allHotels.add(hotel.hotel_name);
+          });
+        }
+      });
 
-      console.log("Filtered data:", filtered_data);
-
-      this.series = [{
-        name: "نام هتل",
+      // Initialize series for all hotels
+      this.series = Array.from(allHotels).map(hotelName => ({
+        name: hotelName,
         data: []
-      }];
+      }));
+
       this.chartOptions.xaxis.categories = [];
       
-      for (let hotel of Object.keys(filtered_data)) {
-        let hotel_date = moment_jalali(hotel).format("jYYYY/jMM/jDD");
+      // Process each date in analysis_data
+      Object.keys(this.analysis_data).forEach(date => {
+        const hotel_date = moment_jalali(date).format("jYYYY/jMM/jDD");
         this.chartOptions.xaxis.categories.push(hotel_date);
         
         try {
-          if (filtered_data[hotel] && filtered_data[hotel].length > 0) {
-            this.series[0].data.push({
-              price: filtered_data[hotel][0].price,
-              hotel_name: filtered_data[hotel][0].hotel_name,
-              room_name: filtered_data[hotel][0].room_name,
-              provider: filtered_data[hotel][0].provider,
-              y: filtered_data[hotel][0].price,
-              x: hotel_date
+          const dateData = this.analysis_data[date];
+          if (dateData && dateData.hotel && Array.isArray(dateData.hotel)) {
+            // Process each hotel's data
+            allHotels.forEach(hotelName => {
+              const hotelData = dateData.hotel.find(h => h.hotel_name === hotelName);
+              const seriesIndex = this.series.findIndex(s => s.name === hotelName);
+              
+              if (hotelData && hotelData.rooms && hotelData.rooms.length > 0) {
+                let cheapestRoom = hotelData.rooms.reduce((prev, curr) => (prev.price < curr.price ? prev : curr));
+                this.series[seriesIndex].data.push({
+                  price: cheapestRoom.price,
+                  hotel_name: hotelData.hotel_name,
+                  room_name: cheapestRoom.name,
+                  provider: cheapestRoom.provider,
+                  y: cheapestRoom.price,
+                  x: hotel_date
+                });
+              } else {
+                this.series[seriesIndex].data.push({
+                  price: 0,
+                  hotel_name: hotelName,
+                  room_name: '',
+                  provider: '',
+                  y: 0,
+                  x: hotel_date
+                });
+              }
             });
           } else {
-            this.series[0].data.push({
+            console.log("Invalid date data structure:", dateData);
+            // Add empty data points for all hotels
+            allHotels.forEach(hotelName => {
+              const seriesIndex = this.series.findIndex(s => s.name === hotelName);
+              this.series[seriesIndex].data.push({
+                price: 0,
+                hotel_name: hotelName,
+                room_name: '',
+                provider: '',
+                y: 0,
+                x: hotel_date
+              });
+            });
+          }
+        } catch (error) {
+          console.error("Error processing hotel data:", error);
+          // Add empty data points for all hotels
+          allHotels.forEach(hotelName => {
+            const seriesIndex = this.series.findIndex(s => s.name === hotelName);
+            this.series[seriesIndex].data.push({
               price: 0,
-              hotel_name: this.hotel.hotel_name,
+              hotel_name: hotelName,
               room_name: '',
               provider: '',
               y: 0,
               x: hotel_date
             });
-          }
-        } catch (error) {
-          console.error("Error processing hotel data:", error);
-          this.series[0].data.push({
-            price: 0,
-            hotel_name: '',
-            room_name: '',
-            provider: '',
-            y: 0,
-            x: hotel_date
           });
         }
-      }
+      });
+
+      // Sort data points by date
+      this.series.forEach(series => {
+        series.data.sort((a, b) => moment_jalali(a.x, "jYYYY/jMM/jDD").valueOf() - moment_jalali(b.x, "jYYYY/jMM/jDD").valueOf());
+      });
+      this.chartOptions.xaxis.categories.sort((a, b) => moment_jalali(a, "jYYYY/jMM/jDD").valueOf() - moment_jalali(b, "jYYYY/jMM/jDD").valueOf());
+
+      // Update chart colors for multiple series
+      this.chartOptions.colors = ['#006600', '#FF0000', '#0000FF', '#FFA500', '#800080'];
 
       console.log("Final series data:", this.series);
 
