@@ -81,16 +81,30 @@
         <hr class="col-12 mt-3">
         <!-- ---- SERVICES ---- -->
         <div class="col-12 col-md-4">
-          <button class="btn btn-primary" :disabled="analysis_loading" v-on:click="showAnalysis">
-            <i class="fa fa-spinner fa-spin ms-1" v-if="analysis_loading"></i>
-            <span v-if="show_analysis">بستن آنالیز</span>
-            <span v-else>نمایش آنالیز</span>
-          </button>
+          <div class="button-group d-flex gap-2 flex-wrap">
+            <button :class="['btn flex-grow-1', {
+              'btn-warning': analysis_loading,
+              'btn-success': show_analysis && !analysis_loading,
+              'btn-info': !show_analysis && !analysis_loading
+            }]" 
+            :disabled="false" 
+            v-on:click="showAnalysis">
+              <i class="fa fa-spinner fa-spin ms-1" v-if="analysis_loading"></i>
+              <span v-if="show_analysis && !analysis_loading">بستن آنالیز</span>
+              <span v-else-if="analysis_loading">در حال دریافت اطلاعات...</span>
+              <span v-else>نمایش آنالیز</span>
+            </button>
 
-          <button class="btn btn-primary ms-2" v-on:click="show_costs = !show_costs">
-            <span v-if="show_costs">بستن هزینه‌ها</span>
-            <span v-else>نمایش هزینه‌ها</span>
-          </button>
+            <button class="btn btn-primary flex-grow-1" v-on:click="show_costs = !show_costs">
+              <span v-if="show_costs">بستن هزینه‌ها</span>
+              <span v-else>نمایش هزینه‌ها</span>
+            </button>
+
+            <button class="btn btn-info flex-grow-1" v-on:click="show_chart = !show_chart">
+              <span v-if="show_chart">بستن نمودار</span>
+              <span v-else>نمایش نمودار</span>
+            </button>
+          </div>
 
           <!-- هزینه ترانسفر -->
           <div class="mt-3" v-if="show_costs">
@@ -176,8 +190,9 @@
         </div>
       </div>
     </div>
+    
     <!-- --- CHART --- -->
-    <div class="p-3" >
+    <div class="p-3" v-if="show_chart">
       <!-- Dropdown above the chart -->
       <div class="mb-3">
         <select v-model="selectedOption" @change="onSelectChange" class="form-select">
@@ -230,7 +245,7 @@ export default {
       selectedOption:'',
       dataKey: 0, // Initialize a key for the component
       show_rooms: false,
-      show_chart:false,
+      show_chart: false,  // Initialize show_chart as false
       room_index: 0,
       sorted_rooms: [],
       show_analysis: false,
@@ -700,5 +715,27 @@ export default {
   border-width: 3px;
   box-shadow: 0 0 10px rgba(0, 0, 0, .15) !important;
   transform: scale(100.8%);
+}
+
+.button-group {
+  margin-bottom: 1rem;
+}
+
+.button-group .btn {
+  min-width: 120px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.button-group .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.button-group .btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 </style>
