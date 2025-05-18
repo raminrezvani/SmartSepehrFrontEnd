@@ -126,43 +126,73 @@
             <div class="position-relative">
               <div class="provider-selector" @click="show_provider = !show_provider">
                 <div class="d-flex justify-content-between align-items-center p-2 border rounded">
-                  <span>{{ allProviderLength }} تامین کننده</span>
+                  <span class="d-flex align-items-center">
+                    <i class="bi bi-building me-2"></i>
+                    {{ allProviderLength }} تامین کننده
+                  </span>
                   <i class="bi" :class="show_provider ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
                 </div>
               </div>
               
-              <div class="provider-overlay" v-if="show_provider" @click="show_provider = false"></div>
-              
-              <div class="provider-dropdown" v-if="show_provider">
-                <div class="provider-header">
-                  <div class="form-check d-flex justify-content-between align-items-center">
-                    <div>
-                      <input type="checkbox" id="filter_provider_all" class="form-check-input" 
-                             :value="true" v-model="allProviderFilter" 
-                             @change="allProviderFilterMethod">
-                      <label for="filter_provider_all" class="form-check-label">همه</label>
-                    </div>
-                    <span class="badge bg-primary">{{ allProviderLength }}</span>
+              <!-- Provider Modal -->
+              <div class="provider-modal" v-if="show_provider">
+                <div class="provider-modal-overlay" @click="show_provider = false"></div>
+                <div class="provider-modal-content">
+                  <div class="provider-modal-header">
+                    <h5 class="mb-0">تامین کنندگان</h5>
+                    <button class="btn-close" @click="show_provider = false"></button>
                   </div>
-                </div>
-                
-                <div class="provider-list">
-                  <div v-for="(provider, index) in providerLength" :key="index" class="provider-item">
-                    <div class="d-flex justify-content-between align-items-center p-2">
-                      <div class="d-flex align-items-center">
-                        <input type="checkbox" 
-                               :id="'provider_' + index" 
-                               v-model="filter_provider[provider.name]" 
-                               :value="true">
-                        <label :for="'provider_' + index" class="ms-2">{{ provider.name }}</label>
+                  
+                  <div class="provider-modal-body">
+                    <div class="provider-header mb-3">
+                      <div class="form-check d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                          <input type="checkbox" id="filter_provider_all" class="form-check-input" 
+                                 :value="true" v-model="allProviderFilter" 
+                                 @change="allProviderFilterMethod">
+                          <label for="filter_provider_all" class="form-check-label ms-2">همه تامین کنندگان</label>
+                        </div>
+                        <span class="badge bg-primary rounded-pill">{{ allProviderLength }}</span>
                       </div>
-                      <span :title="provider.message || ''" 
-                            :style="{ 
-                              cursor: provider.message ? 'help' : 'default',
-                              color: provider.message ? '#dc3545' : 'inherit'
-                            }">
-                        {{ provider.count }}
-                      </span>
+                    </div>
+                    
+                    <div class="provider-list">
+                      <div v-for="(provider, index) in providerLength" :key="index" class="provider-item">
+                        <div class="d-flex justify-content-between align-items-center p-2">
+                          <div class="d-flex align-items-center">
+                            <input type="checkbox" 
+                                   :id="'provider_' + index" 
+                                   v-model="filter_provider[provider.name]" 
+                                   :value="true"
+                                   class="form-check-input">
+                            <label :for="'provider_' + index" class="ms-2 d-flex align-items-center">
+                              <i class="bi bi-building-fill me-2 provider-icon"></i>
+                              {{ provider.name }}
+                            </label>
+                          </div>
+                          <div class="d-flex align-items-center gap-2">
+                            <span :title="provider.message || ''" 
+                                  :class="{'text-danger': provider.message}"
+                                  class="provider-count">
+                              {{ provider.count }}
+                            </span>
+                            <button class="btn btn-sm refresh-provider" 
+                                    @click.stop="refreshProvider(provider.name)"
+                                    :disabled="loading"
+                                    :class="{
+                                      'btn-outline-primary': !loading || refreshingProvider !== provider.name,
+                                      'btn-primary': loading && refreshingProvider === provider.name,
+                                      'loading': loading && refreshingProvider === provider.name
+                                    }">
+                              <div class="spinner-container">
+                                <i class="bi bi-arrow-repeat" v-if="!loading || refreshingProvider !== provider.name"></i>
+                                <div class="spinner" v-else></div>
+                              </div>
+                              <span v-if="loading && refreshingProvider === provider.name" class="ms-1">در حال بروزرسانی...</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -330,7 +360,8 @@ export default {
       fixed_data: [],
       show_result: false,
       datepicker_min_date: "",
-      minimum_date: ""
+      minimum_date: "",
+      refreshingProvider: null
     }
   },
   methods: {
@@ -849,6 +880,41 @@ export default {
       // Call getAnalyseData to fetch the analysis data
       this.getAnalyseData(true);
     },
+    refreshProvider(providerName) {
+      if (this.loading) return;
+      
+      this.refreshingProvider = providerName;
+      const refreshBody = {
+        ...this.body,
+        provider: providerName,
+        use_cache: false
+      };
+
+      this.$http.post('/build-tour/', refreshBody).then(res => {
+        // Update only the specific provider's data
+        if (res.data && res.data.providers && res.data.providers[providerName]) {
+          this.provider_length[providerName] = res.data.providers[providerName];
+        }
+        toast.success(`اطلاعات ${providerName} با موفقیت بروزرسانی شد`, {
+          autoClose: 3000,
+          position: "bottom-left",
+          rtl: false,
+          closeOnClick: true
+        });
+      }).catch((e) => {
+        if (e.response.status === 401) {
+          return router.push('/login');
+        }
+        toast.error(`خطا در بروزرسانی ${providerName}`, {
+          autoClose: 3000,
+          position: "bottom-left",
+          rtl: false,
+          closeOnClick: true
+        });
+      }).finally(() => {
+        this.refreshingProvider = null;
+      });
+    },
   },
   computed: {
     isValidDate() {
@@ -1301,73 +1367,158 @@ export default {
 
 .provider-selector {
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .provider-selector:hover {
   opacity: 0.9;
+  transform: translateY(-1px);
 }
 
-.provider-dropdown {
-  position: absolute;
-  top: 100%;
+.provider-modal {
+  position: fixed;
+  top: 0;
   left: 0;
   right: 0;
-  background: white;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  margin-top: 0.5rem;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  z-index: 1001;
+  bottom: 0;
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.provider-header {
-  padding: 1rem;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.provider-list {
-  max-height: 300px;
-  overflow-y: auto;
-  padding: 0.5rem;
-}
-
-.provider-item {
-  padding: 0.5rem;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-}
-
-.provider-item:hover {
-  background-color: #f8f9fa;
-}
-
-.provider-overlay {
+.provider-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
-  z-index: 999;
+  backdrop-filter: blur(4px);
 }
 
-.btn {
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-  transition: all 0.3s ease;
+.provider-modal-content {
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  animation: modalFadeIn 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
-.btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* Scrollbar Styling */
+.provider-modal-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8f9fa;
+  border-radius: 12px 12px 0 0;
+}
+
+.provider-modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
 .provider-list {
-  scrollbar-width: thin;
-  scrollbar-color: #888 #f1f1f1;
+  max-height: calc(80vh - 200px);
+  overflow-y: auto;
 }
 
+.provider-item {
+  padding: 0.75rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  margin-bottom: 0.5rem;
+  border: 1px solid #e9ecef;
+}
+
+.provider-item:hover {
+  background-color: #f8f9fa;
+  transform: translateX(4px);
+  border-color: #dee2e6;
+}
+
+.spinner-container {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ffffff;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.refresh-provider {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1;
+  border-radius: 0.25rem;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 32px;
+  border: 1px solid #0d6efd;
+  background: transparent;
+  color: #0d6efd;
+}
+
+.refresh-provider:hover:not(:disabled) {
+  background: #0d6efd;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+}
+
+.refresh-provider:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  transform: none;
+  box-shadow: none;
+}
+
+.refresh-provider.loading {
+  background: #0d6efd;
+  color: white;
+  cursor: wait;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Custom scrollbar for provider list */
 .provider-list::-webkit-scrollbar {
   width: 6px;
 }
@@ -1378,26 +1529,49 @@ export default {
 }
 
 .provider-list::-webkit-scrollbar-thumb {
-  background: #888;
+  background: #0d6efd;
   border-radius: 3px;
 }
 
 .provider-list::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: #0b5ed7;
 }
 
-.date-input {
-  position: relative;
+/* Form check styling */
+.form-check-input {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0;
   cursor: pointer;
 }
 
-.date-input input {
-  background-color: #fff;
-  cursor: pointer;
+.form-check-input:checked {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
 }
 
-.form-control[readonly] {
-  background-color: #fff;
+.form-check-label {
   cursor: pointer;
+  user-select: none;
+}
+
+/* Badge styling */
+.badge {
+  font-size: 0.85rem;
+  padding: 0.35rem 0.65rem;
+}
+
+.provider-count {
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  background: #f8f9fa;
+  min-width: 40px;
+  text-align: center;
+}
+
+.provider-icon {
+  color: #0d6efd;
+  font-size: 1.1rem;
 }
 </style>
