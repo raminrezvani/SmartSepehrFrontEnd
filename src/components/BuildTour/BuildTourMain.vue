@@ -145,15 +145,13 @@
                   
                   <div class="provider-modal-body">
                     <div class="provider-header mb-3">
-                      <div class="form-check d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center">
-                          <input type="checkbox" id="filter_provider_all" class="form-check-input" 
-                                 :value="true" v-model="allProviderFilter" 
-                                 @change="allProviderFilterMethod">
-                          <label for="filter_provider_all" class="form-check-label ms-2">همه تامین کنندگان</label>
-                        </div>
-                        <span class="badge bg-primary rounded-pill">{{ allProviderLength }}</span>
+                      <div class="d-flex align-items-center">
+                        <input type="checkbox" id="filter_provider_all" class="form-check-input" 
+                               v-model="allProviderFilter" 
+                               @change="allProviderFilterMethod">
+                        <label for="filter_provider_all" class="form-check-label ms-2">همه تامین کنندگان</label>
                       </div>
+                      <span class="badge bg-primary rounded-pill">{{ allProviderLength }}</span>
                     </div>
                     
                     <div class="provider-list">
@@ -629,18 +627,11 @@ export default {
       },
 
     allProviderFilterMethod() {
-      if (this.allProviderFilter) {
-        for (let pv in this.filter_provider) {
-          this.filter_provider[pv] = false;
-        }
-      } else {
-        for (let pv in this.filter_provider) {
-          this.filter_provider[pv] = true;
-        }
-      }
+      const newState = this.allProviderFilter;
+      Object.keys(this.filter_provider).forEach(key => {
+        this.filter_provider[key] = newState;
+      });
       this.filterProvider();
-
-      
     },
 
     datePickerShowing(val, type) {
@@ -924,13 +915,16 @@ export default {
       return moment(this.body.start_date, "YYYY-MM-DD").add(this.body.night_count, 'd').format("YYYY-MM-DD");
     },
 
-    allProviderFilter() {
-      for (let pv in this.filter_provider) {
-        if (!this.filter_provider[pv]) {
-          return false;
-        }
+    allProviderFilter: {
+      get() {
+        return Object.values(this.filter_provider).every(value => value === true);
+      },
+      set(value) {
+        Object.keys(this.filter_provider).forEach(key => {
+          this.filter_provider[key] = value;
+        });
+        this.filterProvider();
       }
-      return true
     },
 
     providerLength() {
