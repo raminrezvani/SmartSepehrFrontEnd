@@ -145,28 +145,41 @@
                   
                   <div class="provider-modal-body">
                     <div class="provider-header mb-3">
-                      <div class="d-flex align-items-center">
-                        <input type="checkbox" id="filter_provider_all" class="form-check-input" 
-                               v-model="allProviderFilter" 
-                               @change="allProviderFilterMethod">
-                        <label for="filter_provider_all" class="form-check-label ms-2">همه تامین کنندگان</label>
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                          <div class="custom-checkbox-container">
+                            <input type="checkbox" 
+                                   id="filter_provider_all" 
+                                   class="custom-checkbox-input" 
+                                   v-model="allProviderFilter" 
+                                   @change="allProviderFilterMethod">
+                            <label for="filter_provider_all" class="custom-checkbox-label ms-2 d-flex align-items-center">
+                              <span class="custom-checkbox-visual"></span>
+                              همه تامین کنندگان
+                            </label>
+                          </div>
+                        </div>
+                        <span class="badge bg-primary rounded-pill">{{ allProviderLength }}</span>
                       </div>
-                      <span class="badge bg-primary rounded-pill">{{ allProviderLength }}</span>
                     </div>
                     
                     <div class="provider-list">
-                      <div v-for="(provider, index) in providerLength" :key="index" class="provider-item">
+                      <div v-for="(provider, index) in providerLength" :key="index" 
+                           class="provider-item" 
+                           :class="{'provider-loading': refreshingProvider === provider.name}">
                         <div class="d-flex justify-content-between align-items-center p-2">
                           <div class="d-flex align-items-center">
-                            <input type="checkbox" 
-                                   :id="'provider_' + index" 
-                                   v-model="filter_provider[provider.name]" 
-                                   :value="true"
-                                   class="form-check-input">
-                            <label :for="'provider_' + index" class="ms-2 d-flex align-items-center">
-                              <i class="bi bi-building-fill me-2 provider-icon"></i>
-                              {{ provider.name }}
-                            </label>
+                            <div class="custom-checkbox-container">
+                              <input type="checkbox" 
+                                     :id="'provider_' + index" 
+                                     v-model="filter_provider[provider.name]" 
+                                     class="custom-checkbox-input">
+                              <label :for="'provider_' + index" class="custom-checkbox-label d-flex align-items-center">
+                                <span class="custom-checkbox-visual"></span>
+                                <i class="bi bi-building-fill me-2 provider-icon"></i>
+                                {{ provider.name }}
+                              </label>
+                            </div>
                           </div>
                           <div class="d-flex align-items-center gap-2">
                             <span :title="provider.message || ''" 
@@ -1442,12 +1455,18 @@ export default {
   transition: all 0.2s ease;
   margin-bottom: 0.5rem;
   border: 1px solid #e9ecef;
+  background-color: #fff;
 }
 
 .provider-item:hover {
   background-color: #f8f9fa;
   transform: translateX(4px);
   border-color: #dee2e6;
+}
+
+.provider-item.provider-loading {
+  background-color: #fff3cd;
+  border-color: #ffecb5;
 }
 
 .spinner-container {
@@ -1567,5 +1586,72 @@ export default {
 .provider-icon {
   color: #0d6efd;
   font-size: 1.1rem;
+}
+
+/* Custom checkbox styling */
+.custom-checkbox-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.custom-checkbox-input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  z-index: 1;
+}
+
+.custom-checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  padding-right: 25px;
+  margin-bottom: 0;
+}
+
+.custom-checkbox-visual {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  height: 18px;
+  width: 18px;
+  background-color: #eee;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.custom-checkbox-input:checked + .custom-checkbox-label .custom-checkbox-visual {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.custom-checkbox-visual::after {
+  content: '';
+  position: absolute;
+  display: none;
+  left: 5px;
+  top: 1px;
+  width: 6px;
+  height: 12px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.custom-checkbox-input:checked + .custom-checkbox-label .custom-checkbox-visual::after {
+  display: block;
 }
 </style>
