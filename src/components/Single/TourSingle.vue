@@ -368,6 +368,7 @@ export default {
         Kimiya:true,
         kimiya: true,
         "Tak Setare":true,
+        "Tak Setareh":true,
         tak_setare:true,
         Parmis:true,
         parmis:true,
@@ -609,7 +610,10 @@ export default {
             (this.filter_provider.Rahbal && providerName === "rahbal") ||
 
             (this.filter_provider.tak_setare && providerName === "tak_setare") ||
-            (this.filter_provider["Tak Setare"] && providerName === "tak_setare") ||
+            (this.filter_provider["Tak Setareh"] && providerName === "tak_setare") ||
+
+            (this.filter_provider.tak_setareh && providerName === "tak_setareh") ||
+            (this.filter_provider["Tak Setareh"] && providerName === "tak_setareh") ||
 
             (this.filter_provider.hrc && providerName === "hrc") ||
             (this.filter_provider.HRC && providerName === "hrc") ||

@@ -72,6 +72,7 @@ export const store = createStore({
                     Kimiya:true,
                     kimiya: true,
                     "Tak Setare":true,
+                    "Tak Setareh":true,
                     tak_setare:true,
                     Parmis:true,
                     parmis:true,

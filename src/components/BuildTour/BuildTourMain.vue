@@ -329,6 +329,7 @@ export default {
         kimiya:true,
         eram2mhd:true,
         tak_setareh: true,
+        "Tak Setareh":true,
         hrc: true,
         hamood:true,
         safiran:true,
@@ -593,6 +594,10 @@ export default {
               (this.filter_provider.hamood && room.provider === "hamood") ||
               (this.filter_provider.rahbal && room.provider === "rahbal") ||
               (this.filter_provider.tak_setareh && room.provider === "tak_setareh") ||
+
+              (this.filter_provider.tak_setareh && room.provider === "tak_setareh") ||
+              (this.filter_provider["Tak Setareh"] && room.provider === "tak_setareh") ||
+
               (this.filter_provider.FlyToday && room.provider === "FlyToday") ||
               (this.filter_provider.hrc && room.provider === "hrc") ||
               (this.filter_provider.omid_oj && room.provider === "omid_oj") ||
