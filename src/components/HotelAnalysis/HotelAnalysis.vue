@@ -590,12 +590,13 @@ export default {
   emits: ['changeAnalysisStatus'],
   props: {
     data: Object,
-    hotel_names: Array,
+    
     adults: Number
   },
   data() {
     return {
       filter_name: [],
+      hotel_names: [],
       show_chart: false,
       series: [],
       chartOptions: {
@@ -627,8 +628,23 @@ export default {
   mounted() {
     console.log('Hotel Names:', this.hotel_names);
     console.log('Hotel Data:', this.data);
+    this.calculateHotelNames();
   },
   methods: {
+    calculateHotelNames() {
+      const uniqueHotels = new Set();
+      
+      // Iterate through each date in data
+      Object.values(this.data).forEach(dateData => {
+        // Extract hotel names from each date's data
+        dateData.forEach(hotel => {
+          uniqueHotels.add(hotel.hotel_name);
+        });
+      });
+      
+      // Convert Set to Array and sort alphabetically
+      this.hotel_names = Array.from(uniqueHotels).sort();
+    },
     setChart() {
       this.show_chart = false;
       this.series = [];
