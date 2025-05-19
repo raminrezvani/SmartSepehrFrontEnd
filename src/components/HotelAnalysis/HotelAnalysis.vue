@@ -624,6 +624,10 @@ export default {
       },
     }
   },
+  mounted() {
+    console.log('Hotel Names:', this.hotel_names);
+    console.log('Hotel Data:', this.data);
+  },
   methods: {
     setChart() {
       this.show_chart = false;
